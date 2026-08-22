@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Styrkelogg</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <h1>🏋️ Styrkelogg</h1>
+  <button id="settingsBtn" class="icon-btn" title="Inställningar">⚙️</button>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-view="today">Idag</button>
+  <button class="tab-btn" data-view="history">Historik</button>
+</nav>
+
+<main id="app"></main>
+
+<template id="tpl-lift-card">
+  <section class="lift-card">
+    <header class="lift-card-header">
+      <h3 class="lift-name"></h3>
+      <span class="lift-badge"></span>
+    </header>
+    <div class="lift-tm-row">
+      <label>Testade du en singel @RPE8 idag? (valfritt)</label>
+      <div class="tm-test-row">
+        <input type="number" step="0.5" class="tm-test-input" placeholder="vikt">
+        <button class="btn-secondary use-as-max-btn" disabled>Använd som nytt max</button>
+      </div>
+    </div>
+    <div class="lift-plan">
+      <div class="plan-cell"><span class="plan-label">Vikt</span><span class="plan-value weight-value">–</span></div>
+      <div class="plan-cell"><span class="plan-label">Reps/set</span><span class="plan-value reps-value">–</span></div>
+      <div class="plan-cell"><span class="plan-label">RIR-cutoff</span><span class="plan-value rir-value">–</span></div>
+      <div class="plan-cell"><span class="plan-label">Målsätt/vecka</span><span class="plan-value goal-value">–</span></div>
+    </div>
+    <div class="lift-log-row">
+      <label>Set klara denna vecka</label>
+      <input type="number" min="0" class="sets-completed-input" placeholder="antal">
+    </div>
+    <div class="autoreg-banner" hidden></div>
+    <textarea class="lift-notes" placeholder="Anteckningar (t.ex. känsla, teknik)"></textarea>
+  </section>
+</template>
+
+<template id="tpl-accessory-row">
+  <div class="accessory-row">
+    <input type="text" class="acc-name" placeholder="Övning">
+    <input type="text" class="acc-sets-reps" placeholder="t.ex. 3x10">
+    <input type="text" class="acc-weight" placeholder="vikt">
+    <button class="icon-btn acc-remove" title="Ta bort">✕</button>
+  </div>
+</template>
+
+<div id="settingsOverlay" class="overlay" hidden>
+  <div class="sheet">
+    <div class="sheet-header">
+      <h2>Inställningar</h2>
+      <button id="closeSettings" class="icon-btn">✕</button>
+    </div>
+    <div class="sheet-body" id="settingsBody"></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
