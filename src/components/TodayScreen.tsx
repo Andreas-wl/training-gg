@@ -1,22 +1,22 @@
 import { useEffect } from 'react';
 import { useTraining } from '../state/TrainingProvider';
-import { CYCLE_LENGTH, DAY_TEMPLATES, blockWaveLabel, effectiveWeek } from '../domain/rules';
+import { blockWaveLabel, cycleLength, effectiveWeek } from '../domain/programEngine';
 import { LiftCard } from './LiftCard';
 import { AccessoriesBlock } from './AccessoriesBlock';
 
 export function TodayScreen() {
-  const { state, setCurrentWeek, setCurrentDayIndex } = useTraining();
+  const { state, program, setCurrentWeek, setCurrentDayIndex } = useTraining();
   const freq = state.settings.frequency;
-  const days = DAY_TEMPLATES[freq] ?? DAY_TEMPLATES[4];
+  const days = program.dayTemplates[freq] ?? program.dayTemplates[4];
   const dayIndex = state.currentDayIndex >= days.length ? 0 : state.currentDayIndex;
 
   useEffect(() => {
     if (state.currentDayIndex >= days.length) setCurrentDayIndex(0);
   }, [state.currentDayIndex, days.length, setCurrentDayIndex]);
 
-  const bw = blockWaveLabel(state.currentWeek);
-  const effWeek = effectiveWeek(state.currentWeek);
-  const cycle = Math.floor((state.currentWeek - 1) / CYCLE_LENGTH) + 1;
+  const bw = blockWaveLabel(program, state.currentWeek);
+  const effWeek = effectiveWeek(program, state.currentWeek);
+  const cycle = Math.floor((state.currentWeek - 1) / cycleLength(program)) + 1;
 
   return (
     <>
@@ -24,7 +24,7 @@ export function TodayScreen() {
         <button onClick={() => setCurrentWeek(state.currentWeek - 1)}>−</button>
         <div>
           <span className="week-label">
-            Vecka {effWeek} av {CYCLE_LENGTH}
+            Vecka {effWeek} av {cycleLength(program)}
           </span>
           <span className="block-label">
             {bw.text}

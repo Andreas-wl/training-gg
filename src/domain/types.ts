@@ -1,4 +1,52 @@
-import type { LiftKey, Settings, Thresholds } from './rules';
+// Program (lyft-schema) är nu data, inte hårdkodade konstanter - se
+// PLAN.md #4. Ett uppladdat program kan ha helt andra lyftnycklar, så
+// `LiftKey` är inte längre en union av 10 kända strängar.
+export type LiftKey = string;
+
+export interface LiftDefinition {
+  name: string;
+  group: string;
+  isMain: boolean;
+  setScheme: 'autoregulated' | 'fixed';
+  // 'autoregulated' (SBS): inget fast antal set i förväg - antalet set man
+  //   klarade är själva mätvärdet (jämförs mot defaultThresholds).
+  // 'fixed' (t.ex. klassiskt 5×5): targetSets är känt i förväg.
+  targetSets?: number;
+}
+
+export interface PercentRow {
+  pct: number;
+  reps: number;
+  rir: number;
+}
+
+export interface Thresholds {
+  lower: number;
+  upper: number;
+  increasePct: number;
+  decreasePct: number;
+}
+
+export interface Settings {
+  frequency: number;
+  rounding: number;
+  singleAt8Percent: number;
+  unit: string;
+}
+
+export interface Program {
+  id: string;
+  name: string;
+  description?: string;
+  lifts: Record<string, LiftDefinition>;
+  dayTemplates: Record<number, string[][]>;
+  weekMainIntensity: number[];
+  variationOffset: number;
+  percentChart: PercentRow[];
+  defaultThresholds: Thresholds;
+  defaultSettings: Settings;
+  accessorySuggestions?: string[];
+}
 
 // Ett fält per lyft och vecka - samma aggregat-modell som legacy/app.js.
 // Byts ut mot set-nivå-loggning i etapp 4 (se PLAN.md #5).

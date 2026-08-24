@@ -1,8 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { LocalStorageAdapter } from '../storage/LocalStorageAdapter';
 import { TrainingRepository, makeId } from '../storage/TrainingRepository';
-import type { AccessoryLog, LiftLog, TrainingState } from '../domain/types';
-import { computeWeight, intensityFor, percentRow, roundTo, type LiftKey } from '../domain/rules';
+import type { AccessoryLog, LiftKey, LiftLog, Program, TrainingState } from '../domain/types';
+import { computeWeight, intensityFor, percentRow, roundTo } from '../domain/programEngine';
+import sbsDefaultJson from '../data/programs/sbs-default.json';
+
+// I etapp 2 finns bara standardprogrammet, hårdkodat här. Programbibliotek
+// (import/export/välja mellan flera) kommer i etapp 5 - se PLAN.md #10.
+const program = sbsDefaultJson as unknown as Program;
 
 const repository = new TrainingRepository(new LocalStorageAdapter());
 
@@ -22,6 +27,7 @@ function accessoryLogKey(id: string, week: number): string {
 
 interface TrainingContextValue {
   state: TrainingState;
+  program: Program;
   hasRequiredMaxes: boolean;
   setCurrentWeek: (week: number) => void;
   setCurrentDayIndex: (index: number) => void;
@@ -45,13 +51,13 @@ interface TrainingContextValue {
 
 const TrainingContext = createContext<TrainingContextValue | null>(null);
 
-const MAIN_KEYS: LiftKey[] = ['squat', 'bench', 'deadlift', 'ohp'];
+const MAIN_KEYS: LiftKey[] = Object.keys(program.lifts).filter((k) => program.lifts[k].isMain);
 
 export function TrainingProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<TrainingState | null>(null);
 
   useEffect(() => {
-    repository.loadState().then(setState);
+    repository.loadState(program).then(setState);
   }, []);
 
   // Sparar varje gång state ändras, precis som legacy/app.js saveState()
@@ -73,8 +79,8 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
         const merged: LiftLog = { ...existing, ...patch };
 
         const max = prev.maxes[liftKey];
-        const pct = intensityFor(liftKey, week);
-        const { reps, rir } = percentRow(pct);
+        const pct = intensityFor(program, liftKey, week);
+        const { reps, rir } = percentRow(program, pct);
         const effectiveMax = merged.testSingle ? merged.testSingle / prev.settings.singleAt8Percent : max;
         merged.weightUsed = computeWeight(effectiveMax, pct, prev.settings.rounding);
         merged.repsTarget = reps;
@@ -191,11 +197,12 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
     };
 
     const resetAll: TrainingContextValue['resetAll'] = () => {
-      repository.clearState().then(() => repository.loadState()).then(setState);
+      repository.clearState().then(() => repository.loadState(program)).then(setState);
     };
 
     return {
       state,
+      program,
       hasRequiredMaxes,
       setCurrentWeek,
       setCurrentDayIndex,

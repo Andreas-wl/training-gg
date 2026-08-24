@@ -1,0 +1,90 @@
+{
+  "id": "sbs-default",
+  "name": "SBS Strength",
+  "description": "Regler extraherade från \"Kopia av SBS Strength Program.xlsx\" - standardprogrammet, oförändrat från legacy/data.js.",
+  "lifts": {
+    "squat": { "name": "Knäböj", "group": "squat", "isMain": true, "setScheme": "autoregulated" },
+    "bench": { "name": "Bänkpress", "group": "bench", "isMain": true, "setScheme": "autoregulated" },
+    "deadlift": { "name": "Marklyft", "group": "deadlift", "isMain": true, "setScheme": "autoregulated" },
+    "ohp": { "name": "Militärpress", "group": "ohp", "isMain": true, "setScheme": "autoregulated" },
+    "frontSquat": { "name": "Frontböj", "group": "squat", "isMain": false, "setScheme": "autoregulated" },
+    "pausedSquat": { "name": "Knäböj (paus)", "group": "squat", "isMain": false, "setScheme": "autoregulated" },
+    "closeGripBench": { "name": "Bänkpress (smalt grepp)", "group": "bench", "isMain": false, "setScheme": "autoregulated" },
+    "inclinePress": { "name": "Lutande bänkpress", "group": "bench", "isMain": false, "setScheme": "autoregulated" },
+    "sumoDeadlift": { "name": "Marklyft (sumo)", "group": "deadlift", "isMain": false, "setScheme": "autoregulated" },
+    "pushPress": { "name": "Push press", "group": "ohp", "isMain": false, "setScheme": "autoregulated" }
+  },
+  "dayTemplates": {
+    "2": [
+      ["squat", "bench", "sumoDeadlift", "pushPress"],
+      ["deadlift", "ohp", "frontSquat", "closeGripBench"]
+    ],
+    "3": [
+      ["squat", "sumoDeadlift", "inclinePress"],
+      ["bench", "ohp", "frontSquat"],
+      ["deadlift", "closeGripBench", "pausedSquat", "pushPress"]
+    ],
+    "4": [
+      ["squat", "inclinePress", "sumoDeadlift"],
+      ["bench", "frontSquat", "pushPress"],
+      ["deadlift", "closeGripBench"],
+      ["ohp", "pausedSquat"]
+    ],
+    "5": [
+      ["squat", "pushPress"],
+      ["bench", "frontSquat"],
+      ["deadlift", "closeGripBench"],
+      ["ohp", "pausedSquat"],
+      ["inclinePress", "sumoDeadlift"]
+    ],
+    "6": [
+      ["squat", "closeGripBench"],
+      ["pushPress", "sumoDeadlift"],
+      ["bench", "frontSquat"],
+      ["inclinePress", "pausedSquat"],
+      ["deadlift"],
+      ["ohp"]
+    ]
+  },
+  "weekMainIntensity": [
+    0.70, 0.75, 0.80, 0.725, 0.775, 0.825, 0.60,
+    0.75, 0.80, 0.85, 0.775, 0.825, 0.875, 0.60,
+    0.80, 0.85, 0.90, 0.85, 0.90, 0.95, 0.60
+  ],
+  "variationOffset": -0.10,
+  "percentChart": [
+    { "pct": 0.500, "reps": 8, "rir": 5 },
+    { "pct": 0.525, "reps": 8, "rir": 5 },
+    { "pct": 0.550, "reps": 8, "rir": 5 },
+    { "pct": 0.575, "reps": 8, "rir": 5 },
+    { "pct": 0.600, "reps": 7, "rir": 4 },
+    { "pct": 0.625, "reps": 7, "rir": 4 },
+    { "pct": 0.650, "reps": 6, "rir": 4 },
+    { "pct": 0.675, "reps": 6, "rir": 4 },
+    { "pct": 0.700, "reps": 5, "rir": 3 },
+    { "pct": 0.725, "reps": 5, "rir": 3 },
+    { "pct": 0.750, "reps": 4, "rir": 3 },
+    { "pct": 0.775, "reps": 4, "rir": 3 },
+    { "pct": 0.800, "reps": 3, "rir": 2 },
+    { "pct": 0.825, "reps": 3, "rir": 2 },
+    { "pct": 0.850, "reps": 2, "rir": 2 },
+    { "pct": 0.875, "reps": 2, "rir": 2 },
+    { "pct": 0.900, "reps": 1, "rir": 1 },
+    { "pct": 0.925, "reps": 1, "rir": 1 },
+    { "pct": 0.950, "reps": 1, "rir": 1 },
+    { "pct": 0.975, "reps": 1, "rir": 0 },
+    { "pct": 1.000, "reps": 1, "rir": 0 }
+  ],
+  "defaultThresholds": { "lower": 4, "upper": 6, "increasePct": 0.02, "decreasePct": -0.05 },
+  "defaultSettings": { "frequency": 4, "rounding": 2.5, "singleAt8Percent": 0.9, "unit": "kg" },
+  "accessorySuggestions": [
+    "Skivstångsrodd",
+    "Hantelrodd",
+    "Sittande kabelrodd (chest supported)",
+    "T-bar rodd",
+    "Pull-ups",
+    "Chins",
+    "Pull-ups (neutralt grepp)",
+    "Neddrag i block"
+  ]
+}

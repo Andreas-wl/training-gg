@@ -1,19 +1,20 @@
 import { useRef } from 'react';
 import { useTraining } from '../state/TrainingProvider';
-import { LIFTS, computeWeight, intensityFor, percentRow, roundTo, type LiftKey } from '../domain/rules';
+import { computeWeight, intensityFor, percentRow, roundTo } from '../domain/programEngine';
+import type { LiftKey } from '../domain/types';
 
 export function LiftCard({ liftKey }: { liftKey: LiftKey }) {
-  const { state, updateLog, autoregSuggestion, applyMax } = useTraining();
+  const { state, program, updateLog, autoregSuggestion, applyMax } = useTraining();
   const testSingleRef = useRef<HTMLInputElement>(null);
 
-  const lift = LIFTS[liftKey];
+  const lift = program.lifts[liftKey];
   const week = state.currentWeek;
   const logKey = `${liftKey}_w${week}`;
   const log = state.logs[logKey] || {};
   const max = state.maxes[liftKey];
 
-  const pct = intensityFor(liftKey, week);
-  const { reps, rir } = percentRow(pct);
+  const pct = intensityFor(program, liftKey, week);
+  const { reps, rir } = percentRow(program, pct);
   const effectiveMax = log.testSingle ? log.testSingle / state.settings.singleAt8Percent : max;
   const weight = computeWeight(effectiveMax, pct, state.settings.rounding);
 
@@ -24,7 +25,7 @@ export function LiftCard({ liftKey }: { liftKey: LiftKey }) {
       <header className="lift-card-header">
         <h3 className="lift-name">{lift.name}</h3>
         <span className="lift-badge">
-          {lift.isMain ? 'Huvudlyft' : `Variant · ${LIFTS[lift.group].name}`}
+          {lift.isMain ? 'Huvudlyft' : `Variant · ${program.lifts[lift.group].name}`}
         </span>
       </header>
 

@@ -1,9 +1,9 @@
 import { useTraining } from '../state/TrainingProvider';
-import { LIFTS, blockWaveLabel, type LiftKey } from '../domain/rules';
+import { blockWaveLabel } from '../domain/programEngine';
 import type { AccessoryLog, LiftLog } from '../domain/types';
 
 export function HistoryScreen() {
-  const { state } = useTraining();
+  const { state, program } = useTraining();
 
   const liftEntries: { liftKey: string; week: number; log: LiftLog }[] = [];
   Object.entries(state.logs).forEach(([key, log]) => {
@@ -33,9 +33,9 @@ export function HistoryScreen() {
   return (
     <>
       {liftEntries.map(({ liftKey, week, log }) => {
-        const lift = LIFTS[liftKey as LiftKey];
+        const lift = program.lifts[liftKey];
         if (!lift) return null;
-        const bw = blockWaveLabel(week);
+        const bw = blockWaveLabel(program, week);
         const weightText = log.weightUsed != null ? `${log.weightUsed} ${state.settings.unit}` : '–';
         return (
           <div className="history-entry" key={`${liftKey}_w${week}`}>
@@ -56,7 +56,7 @@ export function HistoryScreen() {
       })}
 
       {accEntries.map(({ key, week, log }) => {
-        const bw = blockWaveLabel(week);
+        const bw = blockWaveLabel(program, week);
         return (
           <div className="history-entry" key={key}>
             <div className="h-top">

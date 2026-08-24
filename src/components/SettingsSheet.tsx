@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useTraining } from '../state/TrainingProvider';
-import { BACK_EXERCISES, DEFAULT_SETTINGS, LIFT_ORDER, LIFTS, type LiftKey } from '../domain/rules';
+import type { LiftKey } from '../domain/types';
 
 const FREQUENCIES = [2, 3, 4, 5, 6];
 
 export function SettingsSheet({ onClose }: { onClose: () => void }) {
-  const { state, saveSettings, resetAll } = useTraining();
+  const { state, program, saveSettings, resetAll } = useTraining();
 
   const [frequency, setFrequency] = useState(state.settings.frequency);
   const [rounding, setRounding] = useState(state.settings.rounding);
@@ -26,9 +26,9 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     saveSettings({
       settings: {
         frequency,
-        rounding: rounding || DEFAULT_SETTINGS.rounding,
+        rounding: rounding || program.defaultSettings.rounding,
         unit: unit || 'kg',
-        singleAt8Percent: singleAt8Percent || DEFAULT_SETTINGS.singleAt8Percent,
+        singleAt8Percent: singleAt8Percent || program.defaultSettings.singleAt8Percent,
       },
       thresholds: {
         lower,
@@ -49,8 +49,9 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const mainKeys = LIFT_ORDER.filter((k) => LIFTS[k].isMain);
-  const variantKeys = LIFT_ORDER.filter((k) => !LIFTS[k].isMain);
+  const liftOrder = Object.keys(program.lifts);
+  const mainKeys = liftOrder.filter((k) => program.lifts[k].isMain);
+  const variantKeys = liftOrder.filter((k) => !program.lifts[k].isMain);
 
   return (
     <div
@@ -139,7 +140,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
           <h3>Max (huvudlyft)</h3>
           {mainKeys.map((k) => (
             <div className="field-row" key={k}>
-              <label>{LIFTS[k].name}</label>
+              <label>{program.lifts[k].name}</label>
               <input
                 type="number"
                 step={0.5}
@@ -155,7 +156,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
           </p>
           {variantKeys.map((k) => (
             <div className="field-row" key={k}>
-              <label>{LIFTS[k].name}</label>
+              <label>{program.lifts[k].name}</label>
               <input
                 type="number"
                 step={0.5}
@@ -170,7 +171,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
             <label>Snabbval till tillbehör</label>
             <select value={favoriteBackExercise} onChange={(e) => setFavoriteBackExercise(e.target.value)}>
               <option value="">(ingen)</option>
-              {BACK_EXERCISES.map((b) => (
+              {(program.accessorySuggestions ?? []).map((b) => (
                 <option key={b} value={b}>
                   {b}
                 </option>

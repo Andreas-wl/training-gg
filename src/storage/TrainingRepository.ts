@@ -1,17 +1,16 @@
 import type { StorageAdapter } from './StorageAdapter';
-import type { AccessorySlot, AccessoryLog, TrainingState } from '../domain/types';
-import { DEFAULT_SETTINGS, DEFAULT_THRESHOLDS, LIFT_ORDER } from '../domain/rules';
+import type { AccessorySlot, AccessoryLog, Program, TrainingState } from '../domain/types';
 
 const STORAGE_KEY = 'sbsTrainerData_v1';
 
-function defaultState(): TrainingState {
-  const maxes = {} as TrainingState['maxes'];
-  LIFT_ORDER.forEach((k) => { maxes[k] = null; });
+function defaultState(program: Program): TrainingState {
+  const maxes: TrainingState['maxes'] = {};
+  Object.keys(program.lifts).forEach((k) => { maxes[k] = null; });
   return {
     version: 1,
-    settings: { ...DEFAULT_SETTINGS },
+    settings: { ...program.defaultSettings },
     maxes,
-    thresholds: { ...DEFAULT_THRESHOLDS },
+    thresholds: { ...program.defaultThresholds },
     currentWeek: 1,
     currentDayIndex: 0,
     accessoryPlan: {},
@@ -58,8 +57,8 @@ function migrateOldAccessories(
 export class TrainingRepository {
   constructor(private storage: StorageAdapter) {}
 
-  async loadState(): Promise<TrainingState> {
-    const base = defaultState();
+  async loadState(program: Program): Promise<TrainingState> {
+    const base = defaultState(program);
     try {
       const parsed = await this.storage.getItem<Record<string, unknown>>(STORAGE_KEY);
       if (!parsed) return base;
@@ -69,7 +68,7 @@ export class TrainingRepository {
         ...base,
         ...parsed,
         settings: { ...base.settings, ...((parsed.settings as Partial<TrainingState['settings']>) || {}) },
-        maxes: { ...base.maxes, ...((parsed.maxes as Partial<TrainingState['maxes']>) || {}) },
+        maxes: { ...base.maxes, ...((parsed.maxes as Partial<TrainingState['maxes']>) || {}) } as TrainingState['maxes'],
         thresholds: { ...base.thresholds, ...((parsed.thresholds as Partial<TrainingState['thresholds']>) || {}) },
         accessoryPlan: plan,
         accessoryLogs: accLogs,
