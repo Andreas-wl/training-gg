@@ -1,5 +1,5 @@
 import type { StorageAdapter } from './StorageAdapter';
-import type { AccessorySlot, AccessoryLog, Program, TrainingState, WarmupItem, WarmupLog } from '../domain/types';
+import type { AccessorySlot, AccessoryLog, LiftLog, Program, TrainingState, WarmupItem, WarmupLog } from '../domain/types';
 
 const STORAGE_KEY = 'sbsTrainerData_v1';
 
@@ -54,6 +54,46 @@ function migrateOldAccessories(
   return { plan, logs };
 }
 
+// Gamla loggposter (etapp <4) hade ett gemensamt weightUsed/repsTarget för
+// hela veckan istället för en sets-lista - se PLAN.md #5. Konverterar till
+// ett syntetiskt set så historiken inte försvinner när schemat byts.
+function migrateLogs(rawLogs: Record<string, unknown> | undefined): Record<string, LiftLog> {
+  const migrated: Record<string, LiftLog> = {};
+  Object.entries(rawLogs || {}).forEach(([key, value]) => {
+    const old = value as {
+      sets?: unknown;
+      testSingle?: number | null;
+      notes?: string;
+      weightUsed?: number | null;
+      repsTarget?: number;
+    };
+    if (Array.isArray(old.sets)) {
+      // Redan nya formatet - lämna orört.
+      migrated[key] = old as unknown as LiftLog;
+      return;
+    }
+    migrated[key] = {
+      testSingle: old.testSingle ?? null,
+      notes: old.notes,
+      sets:
+        old.weightUsed != null || old.repsTarget != null
+          ? [
+              {
+                index: 0,
+                targetWeight: old.weightUsed ?? 0,
+                targetReps: old.repsTarget ?? 0,
+                weight: old.weightUsed ?? 0,
+                reps: null,
+                rir: null,
+                adjusted: false,
+              },
+            ]
+          : [],
+    };
+  });
+  return migrated;
+}
+
 // TrainingRepository är den enda platsen som känner till lagringsnyckeln och
 // hur äldre sparade format ska tolkas om - se PLAN.md #3.2.
 export class TrainingRepository {
@@ -76,7 +116,7 @@ export class TrainingRepository {
         accessoryLogs: accLogs,
         warmupPlan: (parsed.warmupPlan as Record<number, WarmupItem[]>) || {},
         warmupLogs: (parsed.warmupLogs as Record<string, WarmupLog>) || {},
-        logs: (parsed.logs as TrainingState['logs']) || {},
+        logs: migrateLogs(parsed.logs as Record<string, unknown> | undefined),
       };
     } catch (e) {
       console.error('Kunde inte läsa sparad data, återställer till standard.', e);

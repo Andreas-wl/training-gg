@@ -1,11 +1,43 @@
 import { useEffect } from 'react';
 import { useTraining } from '../state/TrainingProvider';
-import { blockWaveLabel, cycleLength, effectiveWeek } from '../domain/programEngine';
-import { LiftCard } from './LiftCard';
+import { blockWaveLabel, computeWeight, cycleLength, effectiveWeek, intensityFor, percentRow } from '../domain/programEngine';
+import type { LiftKey } from '../domain/types';
 import { AccessoriesBlock } from './AccessoriesBlock';
 import { WarmupBlock } from './WarmupBlock';
+import { Card } from '../ui/Card';
 
-export function TodayScreen() {
+// Dagöversikt (PLAN.md #8.2) - en lätt lista, inte fulla lyftkort. Klick på
+// en rad öppnar övnings-detaljvyn (ExerciseScreen) via onOpenLift, som styrs
+// från AppShell.
+function LiftRow({ liftKey, week, onOpen }: { liftKey: LiftKey; week: number; onOpen: () => void }) {
+  const { state, program } = useTraining();
+  const lift = program.lifts[liftKey];
+  const log = state.logs[`${liftKey}_w${week}`];
+
+  const pct = intensityFor(program, liftKey, week);
+  const { reps } = percentRow(program, pct);
+  const max = state.maxes[liftKey];
+  const effectiveMax = log?.testSingle ? log.testSingle / state.settings.singleAt8Percent : max;
+  const weight = computeWeight(effectiveMax, pct, state.settings.rounding);
+
+  const setCount = log?.sets?.length ?? 0;
+  const badge = lift.isMain ? 'Huvudlyft' : `Variant · ${program.lifts[lift.group]?.name ?? ''}`;
+  const status = setCount > 0 ? `${setCount} set loggade` : weight != null ? `${weight} ${state.settings.unit} × ${reps}` : 'Sätt max';
+
+  return (
+    <Card className="mb-3 cursor-pointer p-4 active:bg-app" onClick={onOpen}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[17px] font-semibold text-ink">{lift.name}</span>
+        {setCount > 0 && <span className="text-success">✓</span>}
+      </div>
+      <div className="mt-0.5 text-sm text-dim">
+        {badge} · {status}
+      </div>
+    </Card>
+  );
+}
+
+export function TodayScreen({ onOpenLift }: { onOpenLift: (liftKey: LiftKey) => void }) {
   const { state, program, setCurrentWeek, setCurrentDayIndex } = useTraining();
   const freq = state.settings.frequency;
   const days = program.dayTemplates[freq] ?? program.dayTemplates[4];
@@ -61,9 +93,11 @@ export function TodayScreen() {
 
       <WarmupBlock dayIndex={dayIndex} week={state.currentWeek} />
 
-      {days[dayIndex].map((liftKey) => (
-        <LiftCard key={liftKey} liftKey={liftKey} />
-      ))}
+      <div className="mb-4">
+        {days[dayIndex].map((liftKey) => (
+          <LiftRow key={liftKey} liftKey={liftKey} week={state.currentWeek} onOpen={() => onOpenLift(liftKey)} />
+        ))}
+      </div>
 
       <AccessoriesBlock dayIndex={dayIndex} week={state.currentWeek} />
     </>

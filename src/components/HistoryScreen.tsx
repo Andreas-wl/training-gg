@@ -1,14 +1,38 @@
 import { useTraining } from '../state/TrainingProvider';
 import { blockWaveLabel } from '../domain/programEngine';
-import type { AccessoryLog, LiftLog } from '../domain/types';
+import type { AccessoryLog, LiftLog, SetEntry } from '../domain/types';
 import { Card } from '../ui/Card';
+
+// Vanligaste (vikt × reps)-kombinationen bland loggade set - se PLAN.md
+// #8.5: "3 set · 82.5 kg × 5 (1 just.)" avser det representativa setet, inte
+// nödvändigtvis det senast loggade. Set utan reps (t.ex. migrerade
+// legacy-poster) räknas bara in om inga andra set har reps.
+function summarizeSets(sets: SetEntry[]): { weight: number; reps: number | null } | null {
+  const withReps = sets.filter((s) => s.reps != null);
+  const source = withReps.length > 0 ? withReps : sets;
+  if (source.length === 0) return null;
+
+  const counts = new Map<string, { weight: number; reps: number | null; count: number }>();
+  source.forEach((s) => {
+    const key = `${s.weight}_${s.reps}`;
+    const entry = counts.get(key);
+    if (entry) entry.count += 1;
+    else counts.set(key, { weight: s.weight, reps: s.reps, count: 1 });
+  });
+
+  let best: { weight: number; reps: number | null; count: number } | null = null;
+  for (const entry of counts.values()) {
+    if (!best || entry.count > best.count) best = entry;
+  }
+  return best;
+}
 
 export function HistoryScreen() {
   const { state, program } = useTraining();
 
   const liftEntries: { liftKey: string; week: number; log: LiftLog }[] = [];
   Object.entries(state.logs).forEach(([key, log]) => {
-    const hasData = log.testSingle != null || log.setsCompleted != null || (log.notes && log.notes.trim());
+    const hasData = (log.sets?.length ?? 0) > 0 || log.testSingle != null || (log.notes && log.notes.trim());
     if (!hasData) return;
     const m = key.match(/^(.+)_w(\d+)$/);
     if (!m) return;
@@ -41,7 +65,16 @@ export function HistoryScreen() {
         const lift = program.lifts[liftKey];
         if (!lift) return null;
         const bw = blockWaveLabel(program, week);
-        const weightText = log.weightUsed != null ? `${log.weightUsed} ${state.settings.unit}` : '–';
+        const sets = log.sets ?? [];
+        const summary = summarizeSets(sets);
+        const adjustedCount = sets.filter((s) => s.adjusted).length;
+        const setsText =
+          sets.length > 0
+            ? `${sets.length} set${summary ? ` · ${summary.weight} ${state.settings.unit} × ${summary.reps ?? '–'}` : ''}${
+                adjustedCount > 0 ? ` (${adjustedCount} just.)` : ''
+              }`
+            : null;
+
         return (
           <Card className="mb-3 p-4" key={`${liftKey}_w${week}`}>
             <div className="flex items-baseline justify-between">
@@ -49,12 +82,12 @@ export function HistoryScreen() {
               <span className="text-sm text-dim">Vecka {week}</span>
             </div>
             <div className="mt-1 text-sm text-dim">
-              {bw.text} · {weightText} × {log.repsTarget ?? '–'} reps · RIR-cutoff {log.rirCutoff ?? '–'}
+              {bw.text}
+              {setsText ? ` · ${setsText}` : ''}
             </div>
-            <div className="mt-1 text-sm text-dim">
-              Set klara: {log.setsCompleted ?? '–'}
-              {log.testSingle ? ` · Testad singel: ${log.testSingle} ${state.settings.unit}` : ''}
-            </div>
+            {log.testSingle != null && (
+              <div className="mt-1 text-sm text-dim">Testad singel: {log.testSingle} {state.settings.unit}</div>
+            )}
             {log.notes && <div className="mt-1 text-sm text-dim">&quot;{log.notes}&quot;</div>}
           </Card>
         );

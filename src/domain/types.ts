@@ -48,16 +48,26 @@ export interface Program {
   accessorySuggestions?: string[];
 }
 
-// Ett fält per lyft och vecka - samma aggregat-modell som legacy/app.js.
-// Byts ut mot set-nivå-loggning i etapp 4 (se PLAN.md #5).
+// Set-nivå-loggning (etapp 4, PLAN.md #5) - varje set bär sitt eget snapshot
+// av vad som var planerat (targetWeight/targetReps) kontra vad som faktiskt
+// gjordes (weight/reps), så en avvikelse mitt i passet inte skriver över
+// resten av veckans set (buggen i den gamla aggregat-modellen).
+export interface SetEntry {
+  index: number;
+  targetWeight: number;
+  targetReps: number;
+  weight: number;
+  reps: number | null;
+  rir: number | null;
+  adjusted: boolean;
+  adjustedAt?: string;
+  adjustmentNote?: string;
+}
+
 export interface LiftLog {
   testSingle?: number | null;
-  setsCompleted?: number | null;
   notes?: string;
-  weightUsed?: number | null;
-  repsTarget?: number;
-  rirCutoff?: number;
-  pct?: number;
+  sets: SetEntry[];
 }
 
 export interface AccessorySlot {

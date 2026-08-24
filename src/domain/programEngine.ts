@@ -67,3 +67,10 @@ export function roundTo(value: number | null | undefined, rounding: number): num
   if (value == null || !rounding) return value;
   return Math.round(value / rounding) * rounding;
 }
+
+// Ett set räknas som "hårt" om man inte klarade fler reps än vad %-tabellen
+// förväntade sig vid den tänkta RIR-nivån - fler reps än mål betyder att man
+// var längre ifrån failure än planerat, dvs INTE ett hårt set. Se PLAN.md #5.
+export function isHardSet(targetReps: number, reps: number | null): boolean {
+  return reps != null && reps <= targetReps;
+}

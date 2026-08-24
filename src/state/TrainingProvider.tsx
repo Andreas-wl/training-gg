@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { LocalStorageAdapter } from '../storage/LocalStorageAdapter';
 import { TrainingRepository, makeId } from '../storage/TrainingRepository';
-import type { AccessoryLog, LiftKey, LiftLog, Program, TrainingState, WarmupLog } from '../domain/types';
-import { computeWeight, intensityFor, percentRow, roundTo } from '../domain/programEngine';
+import type { AccessoryLog, LiftKey, LiftLog, Program, SetEntry, TrainingState, WarmupLog } from '../domain/types';
+import { computeWeight, intensityFor, isHardSet, percentRow, roundTo } from '../domain/programEngine';
 import sbsDefaultJson from '../data/programs/sbs-default.json';
 
 // I etapp 2 finns bara standardprogrammet, hårdkodat här. Programbibliotek
@@ -35,7 +35,9 @@ interface TrainingContextValue {
   hasRequiredMaxes: boolean;
   setCurrentWeek: (week: number) => void;
   setCurrentDayIndex: (index: number) => void;
-  updateLog: (liftKey: LiftKey, week: number, patch: Partial<LiftLog>) => void;
+  updateLog: (liftKey: LiftKey, week: number, patch: Partial<Pick<LiftLog, 'testSingle' | 'notes'>>) => void;
+  addSet: (liftKey: LiftKey, week: number, weight: number, reps: number | null) => void;
+  removeSet: (liftKey: LiftKey, week: number, position: number) => void;
   autoregSuggestion: (liftKey: LiftKey, week: number) => AutoregSuggestion | null;
   applyMax: (liftKey: LiftKey, newMax: number) => void;
   saveSettings: (patch: {
@@ -84,37 +86,77 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
       setState((prev) => {
         if (!prev) return prev;
         const key = logKeyFor(liftKey, week);
-        const existing = prev.logs[key] || {};
-        const merged: LiftLog = { ...existing, ...patch };
-
-        const max = prev.maxes[liftKey];
-        const pct = intensityFor(program, liftKey, week);
-        const { reps, rir } = percentRow(program, pct);
-        const effectiveMax = merged.testSingle ? merged.testSingle / prev.settings.singleAt8Percent : max;
-        merged.weightUsed = computeWeight(effectiveMax, pct, prev.settings.rounding);
-        merged.repsTarget = reps;
-        merged.rirCutoff = rir;
-        merged.pct = pct;
-
+        const existing = prev.logs[key];
+        const merged: LiftLog = { ...existing, sets: existing?.sets ?? [], ...patch };
         return { ...prev, logs: { ...prev.logs, [key]: merged } };
       });
     };
 
+    // Kärnan i buggfixen (PLAN.md #5): varje set får sitt eget snapshot av
+    // mål (targetWeight/targetReps) beräknat HÄR, vid loggningstillfället -
+    // inte ärvt från föregående set eller skrivet över på ett veckogemensamt
+    // fält. `adjusted` sätts automatiskt utifrån just det här setets avvikelse.
+    const addSet: TrainingContextValue['addSet'] = (liftKey, week, weight, reps) => {
+      setState((prev) => {
+        if (!prev) return prev;
+        const key = logKeyFor(liftKey, week);
+        const existing = prev.logs[key];
+        const sets = existing?.sets ?? [];
+
+        const max = prev.maxes[liftKey];
+        const pct = intensityFor(program, liftKey, week);
+        const { reps: targetReps } = percentRow(program, pct);
+        const effectiveMax = existing?.testSingle ? existing.testSingle / prev.settings.singleAt8Percent : max;
+        const targetWeight = computeWeight(effectiveMax, pct, prev.settings.rounding) ?? 0;
+
+        const adjusted = weight !== targetWeight || reps !== targetReps;
+        const newSet: SetEntry = {
+          index: sets.length,
+          targetWeight,
+          targetReps,
+          weight,
+          reps,
+          rir: null,
+          adjusted,
+          ...(adjusted ? { adjustedAt: new Date().toISOString() } : {}),
+        };
+
+        const merged: LiftLog = { ...existing, sets: [...sets, newSet] };
+        return { ...prev, logs: { ...prev.logs, [key]: merged } };
+      });
+    };
+
+    const removeSet: TrainingContextValue['removeSet'] = (liftKey, week, position) => {
+      setState((prev) => {
+        if (!prev) return prev;
+        const key = logKeyFor(liftKey, week);
+        const existing = prev.logs[key];
+        if (!existing) return prev;
+        const sets = [...(existing.sets ?? [])];
+        sets.splice(position, 1);
+        return { ...prev, logs: { ...prev.logs, [key]: { ...existing, sets } } };
+      });
+    };
+
     const autoregSuggestion: TrainingContextValue['autoregSuggestion'] = (liftKey, week) => {
+      // Fasta scheman autoregleras inte i den här versionen - se PLAN.md #8.3.
+      if (program.lifts[liftKey]?.setScheme === 'fixed') return null;
+
       const key = logKeyFor(liftKey, week);
-      const log = state.logs[key];
-      if (!log || log.setsCompleted == null || (log.setsCompleted as unknown) === '') return null;
-      const sets = Number(log.setsCompleted);
+      const sets = state.logs[key]?.sets ?? [];
+      if (sets.length === 0) return null;
+
+      const hardSets = sets.filter((s) => isHardSet(s.targetReps, s.reps)).length;
       const { lower, upper, increasePct, decreasePct } = state.thresholds;
       const max = state.maxes[liftKey];
       if (!max) return null;
 
-      if (sets < lower) {
+      if (hardSets < lower) {
         const newMax = roundTo(max * (1 + decreasePct), state.settings.rounding);
         if (newMax == null) return null;
         return { direction: 'down', newMax, pct: decreasePct };
       }
-      if (sets >= upper) {
+      if (hardSets >= upper) {
         const newMax = roundTo(max * (1 + increasePct), state.settings.rounding);
         if (newMax == null) return null;
         return { direction: 'up', newMax, pct: increasePct };
@@ -268,6 +310,8 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
       setCurrentWeek,
       setCurrentDayIndex,
       updateLog,
+      addSet,
+      removeSet,
       autoregSuggestion,
       applyMax,
       saveSettings,
