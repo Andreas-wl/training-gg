@@ -2,6 +2,8 @@ import type { StorageAdapter } from './StorageAdapter';
 import type { AccessorySlot, AccessoryLog, LiftLog, Program, TrainingState, WarmupItem, WarmupLog } from '../domain/types';
 
 const STORAGE_KEY = 'sbsTrainerData_v1';
+const CUSTOM_PROGRAMS_KEY = 'sbsCustomPrograms_v1';
+const ACTIVE_PROGRAM_ID_KEY = 'sbsActiveProgramId_v1';
 
 function defaultState(program: Program): TrainingState {
   const maxes: TrainingState['maxes'] = {};
@@ -97,7 +99,10 @@ function migrateLogs(rawLogs: Record<string, unknown> | undefined): Record<strin
 // TrainingRepository är den enda platsen som känner till lagringsnyckeln och
 // hur äldre sparade format ska tolkas om - se PLAN.md #3.2.
 export class TrainingRepository {
-  constructor(private storage: StorageAdapter) {}
+  constructor(
+    private storage: StorageAdapter,
+    private builtInPrograms: Program[],
+  ) {}
 
   async loadState(program: Program): Promise<TrainingState> {
     const base = defaultState(program);
@@ -130,5 +135,29 @@ export class TrainingRepository {
 
   async clearState(): Promise<void> {
     await this.storage.removeItem(STORAGE_KEY);
+  }
+
+  // Programbibliotek (PLAN.md #10, etapp 5): standardprogram + ev. importerade
+  // custom-program. builtInPrograms är aldrig skrivna till storage - bara
+  // custom-program sparas under en egen nyckel, se PLAN.md #3.2.
+  async listPrograms(): Promise<Program[]> {
+    const custom = (await this.storage.getItem<Program[]>(CUSTOM_PROGRAMS_KEY)) || [];
+    return [...this.builtInPrograms, ...custom];
+  }
+
+  async saveProgram(program: Program): Promise<void> {
+    const custom = (await this.storage.getItem<Program[]>(CUSTOM_PROGRAMS_KEY)) || [];
+    const idx = custom.findIndex((p) => p.id === program.id);
+    const next = idx >= 0 ? custom.map((p, i) => (i === idx ? program : p)) : [...custom, program];
+    await this.storage.setItem(CUSTOM_PROGRAMS_KEY, next);
+  }
+
+  async getActiveProgramId(): Promise<string> {
+    const id = await this.storage.getItem<string>(ACTIVE_PROGRAM_ID_KEY);
+    return id || this.builtInPrograms[0]?.id || '';
+  }
+
+  async setActiveProgramId(id: string): Promise<void> {
+    await this.storage.setItem(ACTIVE_PROGRAM_ID_KEY, id);
   }
 }

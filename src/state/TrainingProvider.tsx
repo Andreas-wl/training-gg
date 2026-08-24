@@ -3,13 +3,40 @@ import { LocalStorageAdapter } from '../storage/LocalStorageAdapter';
 import { TrainingRepository, makeId } from '../storage/TrainingRepository';
 import type { AccessoryLog, LiftKey, LiftLog, Program, SetEntry, TrainingState, WarmupLog } from '../domain/types';
 import { computeWeight, intensityFor, isHardSet, percentRow, roundTo } from '../domain/programEngine';
+import { validateProgram } from '../domain/validateProgram';
 import sbsDefaultJson from '../data/programs/sbs-default.json';
 
-// I etapp 2 finns bara standardprogrammet, hårdkodat här. Programbibliotek
-// (import/export/välja mellan flera) kommer i etapp 5 - se PLAN.md #10.
-const program = sbsDefaultJson as unknown as Program;
+// Standardprogrammet är alltid tillgängligt. Programbibliotek (etapp 5,
+// PLAN.md #10) lägger till möjligheten att importera/välja fler ovanpå det.
+const BUILT_IN_PROGRAMS: Program[] = [sbsDefaultJson as unknown as Program];
 
-const repository = new TrainingRepository(new LocalStorageAdapter());
+const repository = new TrainingRepository(new LocalStorageAdapter(), BUILT_IN_PROGRAMS);
+
+// `settings.frequency` är sparat oberoende av program (samma TrainingState
+// delas mellan alla program). Ett program man byter till kan sakna
+// dayTemplates för den frekvens som råkade vara vald tidigare - normalisera
+// till en frekvens som faktiskt finns i det nya programmet, annars kraschar
+// TodayScreen (dayTemplates[freq] blir undefined).
+function resolveFrequency(program: Program, frequency: number): number {
+  if (program.dayTemplates[frequency]) return frequency;
+  const available = Object.keys(program.dayTemplates)
+    .map(Number)
+    .filter((n) => !Number.isNaN(n))
+    .sort((a, b) => a - b);
+  return available[0] ?? frequency;
+}
+
+function downloadProgramJson(program: Program): void {
+  const blob = new Blob([JSON.stringify(program, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${program.id}.json`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+}
 
 export interface AutoregSuggestion {
   direction: 'up' | 'down';
@@ -32,6 +59,7 @@ function warmupLogKey(id: string, week: number): string {
 interface TrainingContextValue {
   state: TrainingState;
   program: Program;
+  programs: Program[];
   hasRequiredMaxes: boolean;
   setCurrentWeek: (week: number) => void;
   setCurrentDayIndex: (index: number) => void;
@@ -58,17 +86,31 @@ interface TrainingContextValue {
   updateWarmupLog: (id: string, week: number, name: string, patch: Partial<WarmupLog>) => void;
   previousWarmupLog: (id: string, week: number) => WarmupLog | null;
   resetAll: () => void;
+  switchProgram: (id: string) => void;
+  importProgram: (program: Program) => { ok: true } | { ok: false; error: string };
+  exportProgram: (program: Program) => void;
 }
 
 const TrainingContext = createContext<TrainingContextValue | null>(null);
 
-const MAIN_KEYS: LiftKey[] = Object.keys(program.lifts).filter((k) => program.lifts[k].isMain);
-
 export function TrainingProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<TrainingState | null>(null);
+  const [program, setProgram] = useState<Program | null>(null);
+  const [programs, setPrograms] = useState<Program[]>([]);
 
   useEffect(() => {
-    repository.loadState(program).then(setState);
+    (async () => {
+      const list = await repository.listPrograms();
+      setPrograms(list);
+      const activeId = await repository.getActiveProgramId();
+      const active = list.find((p) => p.id === activeId) ?? list[0];
+      setProgram(active);
+      const loaded = await repository.loadState(active);
+      setState({
+        ...loaded,
+        settings: { ...loaded.settings, frequency: resolveFrequency(active, loaded.settings.frequency) },
+      });
+    })();
   }, []);
 
   // Sparar varje gång state ändras, precis som legacy/app.js saveState()
@@ -78,9 +120,10 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
   }, [state]);
 
   const value = useMemo<TrainingContextValue | null>(() => {
-    if (!state) return null;
+    if (!state || !program) return null;
 
-    const hasRequiredMaxes = MAIN_KEYS.every((k) => state.maxes[k]);
+    const mainKeys: LiftKey[] = Object.keys(program.lifts).filter((k) => program.lifts[k].isMain);
+    const hasRequiredMaxes = mainKeys.every((k) => state.maxes[k]);
 
     const updateLog: TrainingContextValue['updateLog'] = (liftKey, week, patch) => {
       setState((prev) => {
@@ -303,9 +346,47 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
       repository.clearState().then(() => repository.loadState(program)).then(setState);
     };
 
+    // Programbyte kan lämna currentWeek/currentDayIndex pekande fel om det
+    // nya programmets dagstruktur skiljer sig - se PLAN.md #10/#11. Vi
+    // nollställer alltid båda och ber om bekräftelse innan bytet sker.
+    const switchProgram: TrainingContextValue['switchProgram'] = (id) => {
+      const target = programs.find((p) => p.id === id);
+      if (!target || target.id === program.id) return;
+      if (!window.confirm('Byta program nollställer aktuell vecka och dag till start. Fortsätt?')) return;
+
+      repository
+        .setActiveProgramId(id)
+        .then(() => repository.loadState(target))
+        .then((loaded) => {
+          setProgram(target);
+          setState({
+            ...loaded,
+            currentWeek: 1,
+            currentDayIndex: 0,
+            settings: { ...loaded.settings, frequency: resolveFrequency(target, loaded.settings.frequency) },
+          });
+        });
+    };
+
+    const importProgram: TrainingContextValue['importProgram'] = (candidate) => {
+      const result = validateProgram(candidate);
+      if (!result.ok) return result;
+
+      repository
+        .saveProgram(result.program)
+        .then(() => repository.listPrograms())
+        .then(setPrograms);
+      return { ok: true };
+    };
+
+    const exportProgram: TrainingContextValue['exportProgram'] = (target) => {
+      downloadProgramJson(target);
+    };
+
     return {
       state,
       program,
+      programs,
       hasRequiredMaxes,
       setCurrentWeek,
       setCurrentDayIndex,
@@ -327,9 +408,12 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
       updateWarmupLog,
       previousWarmupLog,
       resetAll,
+      switchProgram,
+      importProgram,
+      exportProgram,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  }, [state, program, programs]);
 
   if (!value) return null;
 

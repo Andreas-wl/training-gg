@@ -4,15 +4,17 @@ import { EmptyState } from './EmptyState';
 import { TodayScreen } from './TodayScreen';
 import { ExerciseScreen } from './ExerciseScreen';
 import { HistoryScreen } from './HistoryScreen';
+import { ProgramLibraryScreen } from './ProgramLibraryScreen';
 import { SettingsSheet } from './SettingsSheet';
 import { TabBar, type TabBarItem } from '../ui/TabBar';
 import type { LiftKey } from '../domain/types';
 
-type View = 'today' | 'history';
+type View = 'today' | 'history' | 'program';
 
 const TABS: TabBarItem[] = [
   { key: 'today', label: 'Idag', icon: '🏠' },
   { key: 'history', label: 'Historik', icon: '📜' },
+  { key: 'program', label: 'Program', icon: '📋' },
 ];
 
 export function AppShell() {
@@ -54,8 +56,10 @@ export function AppShell() {
           ) : (
             <TodayScreen onOpenLift={setOpenLift} />
           )
-        ) : (
+        ) : view === 'history' ? (
           <HistoryScreen />
+        ) : (
+          <ProgramLibraryScreen />
         )}
       </main>
 
