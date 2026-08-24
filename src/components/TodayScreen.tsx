@@ -3,6 +3,7 @@ import { useTraining } from '../state/TrainingProvider';
 import { blockWaveLabel, cycleLength, effectiveWeek } from '../domain/programEngine';
 import { LiftCard } from './LiftCard';
 import { AccessoriesBlock } from './AccessoriesBlock';
+import { WarmupBlock } from './WarmupBlock';
 
 export function TodayScreen() {
   const { state, program, setCurrentWeek, setCurrentDayIndex } = useTraining();
@@ -20,31 +21,45 @@ export function TodayScreen() {
 
   return (
     <>
-      <div className="week-nav">
-        <button onClick={() => setCurrentWeek(state.currentWeek - 1)}>−</button>
-        <div>
-          <span className="week-label">
+      <div className="mb-4 flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm">
+        <button
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-app text-lg text-ink"
+          onClick={() => setCurrentWeek(state.currentWeek - 1)}
+        >
+          −
+        </button>
+        <div className="text-center">
+          <div className="font-semibold text-ink">
             Vecka {effWeek} av {cycleLength(program)}
-          </span>
-          <span className="block-label">
+          </div>
+          <div className="mt-0.5 text-xs text-dim">
             {bw.text}
             {cycle > 1 ? ` · Cykel ${cycle}` : ''}
-          </span>
+          </div>
         </div>
-        <button onClick={() => setCurrentWeek(state.currentWeek + 1)}>+</button>
+        <button
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-app text-lg text-ink"
+          onClick={() => setCurrentWeek(state.currentWeek + 1)}
+        >
+          +
+        </button>
       </div>
 
-      <div className="day-selector">
+      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
         {days.map((_, idx) => (
           <button
             key={idx}
-            className={idx === dayIndex ? 'active' : ''}
+            className={`flex-shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium ${
+              idx === dayIndex ? 'bg-accent text-white' : 'bg-white text-dim shadow-sm'
+            }`}
             onClick={() => setCurrentDayIndex(idx)}
           >
             Dag {idx + 1}
           </button>
         ))}
       </div>
+
+      <WarmupBlock dayIndex={dayIndex} week={state.currentWeek} />
 
       {days[dayIndex].map((liftKey) => (
         <LiftCard key={liftKey} liftKey={liftKey} />

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { LocalStorageAdapter } from '../storage/LocalStorageAdapter';
 import { TrainingRepository, makeId } from '../storage/TrainingRepository';
-import type { AccessoryLog, LiftKey, LiftLog, Program, TrainingState } from '../domain/types';
+import type { AccessoryLog, LiftKey, LiftLog, Program, TrainingState, WarmupLog } from '../domain/types';
 import { computeWeight, intensityFor, percentRow, roundTo } from '../domain/programEngine';
 import sbsDefaultJson from '../data/programs/sbs-default.json';
 
@@ -25,6 +25,10 @@ function accessoryLogKey(id: string, week: number): string {
   return `acc_${id}_w${week}`;
 }
 
+function warmupLogKey(id: string, week: number): string {
+  return `warmup_${id}_w${week}`;
+}
+
 interface TrainingContextValue {
   state: TrainingState;
   program: Program;
@@ -46,6 +50,11 @@ interface TrainingContextValue {
   renameAccessorySlot: (dayIndex: number, slotIndex: number, name: string) => void;
   updateAccessoryLog: (id: string, week: number, name: string, patch: Partial<AccessoryLog>) => void;
   previousAccessoryLog: (id: string, week: number) => AccessoryLog | null;
+  addWarmupItem: (dayIndex: number) => void;
+  removeWarmupItem: (dayIndex: number, itemIndex: number) => void;
+  renameWarmupItem: (dayIndex: number, itemIndex: number, name: string) => void;
+  updateWarmupLog: (id: string, week: number, name: string, patch: Partial<WarmupLog>) => void;
+  previousWarmupLog: (id: string, week: number) => WarmupLog | null;
   resetAll: () => void;
 }
 
@@ -196,6 +205,58 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
       return null;
     };
 
+    const addWarmupItem: TrainingContextValue['addWarmupItem'] = (dayIndex) => {
+      setState((prev) => {
+        if (!prev) return prev;
+        const items = prev.warmupPlan[dayIndex] || [];
+        return {
+          ...prev,
+          warmupPlan: { ...prev.warmupPlan, [dayIndex]: [...items, { id: makeId(), name: '' }] },
+        };
+      });
+    };
+
+    const removeWarmupItem: TrainingContextValue['removeWarmupItem'] = (dayIndex, itemIndex) => {
+      setState((prev) => {
+        if (!prev) return prev;
+        const items = [...(prev.warmupPlan[dayIndex] || [])];
+        items.splice(itemIndex, 1);
+        return { ...prev, warmupPlan: { ...prev.warmupPlan, [dayIndex]: items } };
+      });
+    };
+
+    const renameWarmupItem: TrainingContextValue['renameWarmupItem'] = (dayIndex, itemIndex, name) => {
+      setState((prev) => {
+        if (!prev) return prev;
+        const items = [...(prev.warmupPlan[dayIndex] || [])];
+        if (!items[itemIndex]) return prev;
+        items[itemIndex] = { ...items[itemIndex], name };
+        return { ...prev, warmupPlan: { ...prev.warmupPlan, [dayIndex]: items } };
+      });
+    };
+
+    const updateWarmupLog: TrainingContextValue['updateWarmupLog'] = (id, week, _name, patch) => {
+      setState((prev) => {
+        if (!prev) return prev;
+        const key = warmupLogKey(id, week);
+        const existing = prev.warmupLogs[key] || {};
+        return {
+          ...prev,
+          warmupLogs: { ...prev.warmupLogs, [key]: { ...existing, ...patch } },
+        };
+      });
+    };
+
+    // Senaste loggade värdet för denna uppvärmningsövning (tidigare vecka) -
+    // samma "föreslå senaste veckans värde"-mönster som previousAccessoryLog.
+    const previousWarmupLog: TrainingContextValue['previousWarmupLog'] = (id, week) => {
+      for (let w = week - 1; w >= 1; w -= 1) {
+        const log = state.warmupLogs[warmupLogKey(id, w)];
+        if (log) return log;
+      }
+      return null;
+    };
+
     const resetAll: TrainingContextValue['resetAll'] = () => {
       repository.clearState().then(() => repository.loadState(program)).then(setState);
     };
@@ -216,6 +277,11 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
       renameAccessorySlot,
       updateAccessoryLog,
       previousAccessoryLog,
+      addWarmupItem,
+      removeWarmupItem,
+      renameWarmupItem,
+      updateWarmupLog,
+      previousWarmupLog,
       resetAll,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -232,4 +298,4 @@ export function useTraining(): TrainingContextValue {
   return ctx;
 }
 
-export { logKeyFor, accessoryLogKey };
+export { logKeyFor, accessoryLogKey, warmupLogKey };

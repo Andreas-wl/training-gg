@@ -1,8 +1,16 @@
 import { useState } from 'react';
 import { useTraining } from '../state/TrainingProvider';
 import type { LiftKey } from '../domain/types';
+import { Sheet } from '../ui/Sheet';
+import { Card } from '../ui/Card';
+import { SectionHeader } from '../ui/SectionHeader';
+import { ListRow } from '../ui/ListRow';
+import { Button } from '../ui/Button';
 
 const FREQUENCIES = [2, 3, 4, 5, 6];
+
+const fieldInputClass =
+  'w-24 rounded-lg border-0 bg-app px-2 py-1.5 text-right text-[15px] text-ink focus:outline-none focus:ring-2 focus:ring-accent';
 
 export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const { state, program, saveSettings, resetAll } = useTraining();
@@ -54,122 +62,171 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const variantKeys = liftOrder.filter((k) => !program.lifts[k].isMain);
 
   return (
-    <div
-      className="overlay"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="sheet">
-        <div className="sheet-header">
-          <h2>Inställningar</h2>
-          <button className="icon-btn" onClick={onClose}>
-            ✕
-          </button>
-        </div>
-
-        <div className="sheet-body">
-          <h3>Grundinställningar</h3>
-          <div className="field-row">
-            <label>Pass per vecka</label>
-            <select value={frequency} onChange={(e) => setFrequency(Number(e.target.value))}>
+    <Sheet title="Inställningar" onClose={onClose}>
+      <SectionHeader title="Grundinställningar" />
+      <Card className="divide-y divide-app">
+        <ListRow
+          title="Pass per vecka"
+          right={
+            <select
+              className={fieldInputClass}
+              value={frequency}
+              onChange={(e) => setFrequency(Number(e.target.value))}
+            >
               {FREQUENCIES.map((f) => (
                 <option key={f} value={f}>
                   {f}
                 </option>
               ))}
             </select>
-          </div>
-          <div className="field-row">
-            <label>Avrundning</label>
+          }
+        />
+        <ListRow
+          title="Avrundning"
+          right={
             <input
               type="number"
               step={0.5}
+              className={fieldInputClass}
               value={rounding}
               onChange={(e) => setRounding(Number(e.target.value))}
             />
-          </div>
-          <div className="field-row">
-            <label>Enhet (etikett)</label>
-            <input type="text" value={unit} onChange={(e) => setUnit(e.target.value)} />
-          </div>
-          <div className="field-row">
-            <label>Singel @RPE8 (% av 1RM)</label>
+          }
+        />
+        <ListRow
+          title="Enhet (etikett)"
+          right={
+            <input
+              type="text"
+              className={fieldInputClass}
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+            />
+          }
+        />
+        <ListRow
+          title="Singel @RPE8 (% av 1RM)"
+          right={
             <input
               type="number"
               step={0.01}
+              className={fieldInputClass}
               value={singleAt8Percent}
               onChange={(e) => setSingleAt8Percent(Number(e.target.value))}
             />
-          </div>
-          <p className="hint">
-            En singel med 2 reps kvar (RPE8) antas motsvara denna andel av ditt sanna 1RM.
-          </p>
+          }
+        />
+      </Card>
+      <p className="mb-1 mt-2 px-1 text-xs text-dim">
+        En singel med 2 reps kvar (RPE8) antas motsvara denna andel av ditt sanna 1RM.
+      </p>
 
-          <h3>Autoreglering (set/vecka)</h3>
-          <div className="field-row">
-            <label>Nedre tröskel</label>
-            <input type="number" step={1} value={lower} onChange={(e) => setLower(Number(e.target.value))} />
-          </div>
-          <div className="field-row">
-            <label>Övre tröskel</label>
-            <input type="number" step={1} value={upper} onChange={(e) => setUpper(Number(e.target.value))} />
-          </div>
-          <div className="field-row">
-            <label>Öka med (%)</label>
+      <SectionHeader title="Autoreglering (set/vecka)" />
+      <Card className="divide-y divide-app">
+        <ListRow
+          title="Nedre tröskel"
+          right={
             <input
               type="number"
               step={1}
+              className={fieldInputClass}
+              value={lower}
+              onChange={(e) => setLower(Number(e.target.value))}
+            />
+          }
+        />
+        <ListRow
+          title="Övre tröskel"
+          right={
+            <input
+              type="number"
+              step={1}
+              className={fieldInputClass}
+              value={upper}
+              onChange={(e) => setUpper(Number(e.target.value))}
+            />
+          }
+        />
+        <ListRow
+          title="Öka med (%)"
+          right={
+            <input
+              type="number"
+              step={1}
+              className={fieldInputClass}
               value={increasePct}
               onChange={(e) => setIncreasePct(Number(e.target.value))}
             />
-          </div>
-          <div className="field-row">
-            <label>Minska med (%)</label>
+          }
+        />
+        <ListRow
+          title="Minska med (%)"
+          right={
             <input
               type="number"
               step={1}
+              className={fieldInputClass}
               value={decreasePct}
               onChange={(e) => setDecreasePct(Number(e.target.value))}
             />
-          </div>
-          <p className="hint">
-            Under nedre tröskeln → sänk max. Vid/över övre tröskeln → höj max. Standard: 4-6 set, +2%/−5%.
-          </p>
+          }
+        />
+      </Card>
+      <p className="mb-1 mt-2 px-1 text-xs text-dim">
+        Under nedre tröskeln → sänk max. Vid/över övre tröskeln → höj max. Standard: 4-6 set, +2%/−5%.
+      </p>
 
-          <h3>Max (huvudlyft)</h3>
-          {mainKeys.map((k) => (
-            <div className="field-row" key={k}>
-              <label>{program.lifts[k].name}</label>
+      <SectionHeader title="Max (huvudlyft)" />
+      <Card className="divide-y divide-app">
+        {mainKeys.map((k) => (
+          <ListRow
+            key={k}
+            title={program.lifts[k].name}
+            right={
               <input
                 type="number"
                 step={0.5}
+                className={fieldInputClass}
                 value={maxes[k] ?? ''}
                 onChange={(e) => setMax(k, e.target.value)}
               />
-            </div>
-          ))}
+            }
+          />
+        ))}
+      </Card>
 
-          <h3>Max (varianter, valfritt)</h3>
-          <p className="hint">
-            Känner du inte till ditt max? Gissa lågt till att börja med – du kan justera senare.
-          </p>
-          {variantKeys.map((k) => (
-            <div className="field-row" key={k}>
-              <label>{program.lifts[k].name}</label>
+      <SectionHeader title="Max (varianter, valfritt)" />
+      <p className="mb-1 px-1 text-xs text-dim">
+        Känner du inte till ditt max? Gissa lågt till att börja med – du kan justera senare.
+      </p>
+      <Card className="divide-y divide-app">
+        {variantKeys.map((k) => (
+          <ListRow
+            key={k}
+            title={program.lifts[k].name}
+            right={
               <input
                 type="number"
                 step={0.5}
+                className={fieldInputClass}
                 value={maxes[k] ?? ''}
                 onChange={(e) => setMax(k, e.target.value)}
               />
-            </div>
-          ))}
+            }
+          />
+        ))}
+      </Card>
 
-          <h3>Favorit-ryggövning</h3>
-          <div className="field-row">
-            <label>Snabbval till tillbehör</label>
-            <select value={favoriteBackExercise} onChange={(e) => setFavoriteBackExercise(e.target.value)}>
+      <SectionHeader title="Favorit-ryggövning" />
+      <Card className="mb-5">
+        <ListRow
+          title="Snabbval till tillbehör"
+          right={
+            <select
+              className={fieldInputClass}
+              value={favoriteBackExercise}
+              onChange={(e) => setFavoriteBackExercise(e.target.value)}
+            >
               <option value="">(ingen)</option>
               {(program.accessorySuggestions ?? []).map((b) => (
                 <option key={b} value={b}>
@@ -177,20 +234,16 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
                 </option>
               ))}
             </select>
-          </div>
+          }
+        />
+      </Card>
 
-          <button className="save-settings-btn" onClick={handleSave}>
-            Spara inställningar
-          </button>
-          <button
-            className="btn-secondary"
-            style={{ width: '100%', marginTop: '0.6rem' }}
-            onClick={handleReset}
-          >
-            Återställ all data
-          </button>
-        </div>
-      </div>
-    </div>
+      <Button className="w-full" onClick={handleSave}>
+        Spara inställningar
+      </Button>
+      <Button variant="danger" className="mt-3 w-full" onClick={handleReset}>
+        Återställ all data
+      </Button>
+    </Sheet>
   );
 }

@@ -71,6 +71,20 @@ export interface AccessoryLog {
   weight?: string;
 }
 
+// Fritt tillägg ovanpå programmets mall, samma mönster som AccessorySlot -
+// se PLAN.md #6. Bor i TrainingState, inte i Program.
+export interface WarmupItem {
+  id: string;
+  name: string;
+  setsReps?: string;
+  weight?: string;
+}
+
+export interface WarmupLog {
+  setsReps?: string;
+  weight?: string;
+}
+
 export interface TrainingState {
   version: number;
   settings: Settings;
@@ -80,6 +94,8 @@ export interface TrainingState {
   currentDayIndex: number;
   accessoryPlan: Record<number, AccessorySlot[]>;
   accessoryLogs: Record<string, AccessoryLog>;
+  warmupPlan: Record<number, WarmupItem[]>;
+  warmupLogs: Record<string, WarmupLog>;
   favoriteBackExercise: string;
   logs: Record<string, LiftLog>;
 }

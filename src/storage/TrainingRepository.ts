@@ -1,5 +1,5 @@
 import type { StorageAdapter } from './StorageAdapter';
-import type { AccessorySlot, AccessoryLog, Program, TrainingState } from '../domain/types';
+import type { AccessorySlot, AccessoryLog, Program, TrainingState, WarmupItem, WarmupLog } from '../domain/types';
 
 const STORAGE_KEY = 'sbsTrainerData_v1';
 
@@ -15,6 +15,8 @@ function defaultState(program: Program): TrainingState {
     currentDayIndex: 0,
     accessoryPlan: {},
     accessoryLogs: {},
+    warmupPlan: {},
+    warmupLogs: {},
     favoriteBackExercise: '',
     logs: {},
   };
@@ -72,6 +74,8 @@ export class TrainingRepository {
         thresholds: { ...base.thresholds, ...((parsed.thresholds as Partial<TrainingState['thresholds']>) || {}) },
         accessoryPlan: plan,
         accessoryLogs: accLogs,
+        warmupPlan: (parsed.warmupPlan as Record<number, WarmupItem[]>) || {},
+        warmupLogs: (parsed.warmupLogs as Record<string, WarmupLog>) || {},
         logs: (parsed.logs as TrainingState['logs']) || {},
       };
     } catch (e) {

@@ -2,6 +2,11 @@ import { useRef } from 'react';
 import { useTraining } from '../state/TrainingProvider';
 import { computeWeight, intensityFor, percentRow, roundTo } from '../domain/programEngine';
 import type { LiftKey } from '../domain/types';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
+
+const inputClass =
+  'w-full rounded-xl border-0 bg-app px-3 py-2 text-[15px] text-ink placeholder:text-dim focus:outline-none focus:ring-2 focus:ring-accent';
 
 export function LiftCard({ liftKey }: { liftKey: LiftKey }) {
   const { state, program, updateLog, autoregSuggestion, applyMax } = useTraining();
@@ -21,23 +26,23 @@ export function LiftCard({ liftKey }: { liftKey: LiftKey }) {
   const suggestion = autoregSuggestion(liftKey, week);
 
   return (
-    <section className="lift-card">
-      <header className="lift-card-header">
-        <h3 className="lift-name">{lift.name}</h3>
-        <span className="lift-badge">
+    <Card className="mb-4 p-4">
+      <div className="mb-3 flex items-baseline justify-between">
+        <h3 className="text-[17px] font-semibold text-ink">{lift.name}</h3>
+        <span className="text-xs text-dim">
           {lift.isMain ? 'Huvudlyft' : `Variant · ${program.lifts[lift.group].name}`}
         </span>
-      </header>
+      </div>
 
-      <div className="lift-tm-row">
-        <label>Testade du en singel @RPE8 idag? (valfritt)</label>
-        <div className="tm-test-row">
+      <div className="mb-3">
+        <label className="mb-1 block text-xs text-dim">Testade du en singel @RPE8 idag? (valfritt)</label>
+        <div className="flex flex-wrap gap-2">
           <input
             key={logKey}
             ref={testSingleRef}
             type="number"
             step={0.5}
-            className="tm-test-input"
+            className={`${inputClass} w-24 flex-none`}
             placeholder="vikt"
             defaultValue={log.testSingle ?? ''}
             onBlur={(e) => {
@@ -45,8 +50,9 @@ export function LiftCard({ liftKey }: { liftKey: LiftKey }) {
               updateLog(liftKey, week, { testSingle: val });
             }}
           />
-          <button
-            className="btn-secondary use-as-max-btn"
+          <Button
+            variant="secondary"
+            className="flex-1 text-xs"
             disabled={!log.testSingle}
             onClick={() => {
               const val = Number(testSingleRef.current?.value);
@@ -56,38 +62,40 @@ export function LiftCard({ liftKey }: { liftKey: LiftKey }) {
             }}
           >
             Använd som nytt max
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="lift-plan">
-        <div className="plan-cell">
-          <span className="plan-label">Vikt</span>
-          <span className="plan-value weight-value">{max ? `${weight} ${state.settings.unit}` : 'Sätt max'}</span>
+      <div className="mb-3 grid grid-cols-4 gap-2 rounded-xl bg-app p-3">
+        <div className="text-center">
+          <span className="block text-[11px] text-dim">Vikt</span>
+          <span className="mt-0.5 block text-base font-semibold text-ink">
+            {max ? `${weight} ${state.settings.unit}` : 'Sätt max'}
+          </span>
         </div>
-        <div className="plan-cell">
-          <span className="plan-label">Reps/set</span>
-          <span className="plan-value reps-value">{reps}</span>
+        <div className="text-center">
+          <span className="block text-[11px] text-dim">Reps/set</span>
+          <span className="mt-0.5 block text-base font-semibold text-ink">{reps}</span>
         </div>
-        <div className="plan-cell">
-          <span className="plan-label">RIR-cutoff</span>
-          <span className="plan-value rir-value">{rir}</span>
+        <div className="text-center">
+          <span className="block text-[11px] text-dim">RIR-cutoff</span>
+          <span className="mt-0.5 block text-base font-semibold text-ink">{rir}</span>
         </div>
-        <div className="plan-cell">
-          <span className="plan-label">Målsätt/vecka</span>
-          <span className="plan-value goal-value">
+        <div className="text-center">
+          <span className="block text-[11px] text-dim">Målsätt/vecka</span>
+          <span className="mt-0.5 block text-base font-semibold text-ink">
             {state.thresholds.lower}-{state.thresholds.upper} set
           </span>
         </div>
       </div>
 
-      <div className="lift-log-row">
-        <label>Set klara denna vecka</label>
+      <div className="mb-3">
+        <label className="mb-1 block text-xs text-dim">Set klara denna vecka</label>
         <input
           key={logKey}
           type="number"
           min={0}
-          className="sets-completed-input"
+          className={inputClass}
           placeholder="antal"
           defaultValue={log.setsCompleted ?? ''}
           onBlur={(e) => {
@@ -98,22 +106,31 @@ export function LiftCard({ liftKey }: { liftKey: LiftKey }) {
       </div>
 
       {suggestion && (
-        <div className={`autoreg-banner ${suggestion.direction === 'up' ? 'up' : 'down'}`}>
+        <div
+          className={`mb-3 flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm ${
+            suggestion.direction === 'up' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
+          }`}
+        >
           <span>
             {suggestion.direction === 'up' ? '📈' : '📉'} Förslag: {suggestion.pct > 0 ? '+' : ''}
             {Math.round(suggestion.pct * 100)}% → {suggestion.newMax} {state.settings.unit}
           </span>
-          <button onClick={() => applyMax(liftKey, suggestion.newMax)}>Använd</button>
+          <button
+            className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-ink shadow-sm"
+            onClick={() => applyMax(liftKey, suggestion.newMax)}
+          >
+            Använd
+          </button>
         </div>
       )}
 
       <textarea
         key={logKey}
-        className="lift-notes"
+        className={`${inputClass} min-h-[2.6rem] resize-y`}
         placeholder="Anteckningar (t.ex. känsla, teknik)"
         defaultValue={log.notes || ''}
         onBlur={(e) => updateLog(liftKey, week, { notes: e.target.value })}
       />
-    </section>
+    </Card>
   );
 }

@@ -4,8 +4,14 @@ import { EmptyState } from './EmptyState';
 import { TodayScreen } from './TodayScreen';
 import { HistoryScreen } from './HistoryScreen';
 import { SettingsSheet } from './SettingsSheet';
+import { TabBar, type TabBarItem } from '../ui/TabBar';
 
 type View = 'today' | 'history';
+
+const TABS: TabBarItem[] = [
+  { key: 'today', label: 'Idag', icon: '🏠' },
+  { key: 'history', label: 'Historik', icon: '📜' },
+];
 
 export function AppShell() {
   const { hasRequiredMaxes } = useTraining();
@@ -18,29 +24,18 @@ export function AppShell() {
 
   return (
     <>
-      <header className="topbar">
-        <h1>🏋️ Styrkelogg</h1>
-        <button className="icon-btn" title="Inställningar" onClick={() => setSettingsOpen(true)}>
+      <header className="flex items-start justify-between px-5 pb-2 pt-6">
+        <h1 className="text-3xl font-bold text-ink">Styrkelogg</h1>
+        <button
+          className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-white text-ink shadow-sm"
+          title="Inställningar"
+          onClick={() => setSettingsOpen(true)}
+        >
           ⚙️
         </button>
       </header>
 
-      <nav className="tabs">
-        <button
-          className={`tab-btn ${view === 'today' ? 'active' : ''}`}
-          onClick={() => setView('today')}
-        >
-          Idag
-        </button>
-        <button
-          className={`tab-btn ${view === 'history' ? 'active' : ''}`}
-          onClick={() => setView('history')}
-        >
-          Historik
-        </button>
-      </nav>
-
-      <main id="app">
+      <main className="mx-auto max-w-[640px] px-4 pb-8">
         {!hasRequiredMaxes ? (
           <EmptyState onOpenSettings={() => setSettingsOpen(true)} />
         ) : view === 'today' ? (
@@ -49,6 +44,8 @@ export function AppShell() {
           <HistoryScreen />
         )}
       </main>
+
+      <TabBar items={TABS} active={view} onChange={(key) => setView(key as View)} />
 
       {settingsOpen && <SettingsSheet onClose={() => setSettingsOpen(false)} />}
     </>
