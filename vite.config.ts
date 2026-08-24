@@ -4,6 +4,10 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  // GitHub Pages-projektsida (https://andreas-wl.github.io/training-gg/),
+  // inte en användarsida på roten - alla asset-sökvägar måste vara
+  // prefixade med undermappen.
+  base: '/training-gg/',
   plugins: [
     react(),
     tailwindcss(),
