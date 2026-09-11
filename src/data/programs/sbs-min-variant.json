@@ -1,0 +1,481 @@
+{
+  "id": "sbs-min-variant",
+  "name": "SBS - min variant",
+  "description": "Min egen variant av SBS Strength: fast passordning (mobility -> explosivt -> SBS -> tillägg), Nordic hamstring curls istället för sumomarklyft i dag 1, och egna för-/eftersatser per dag. Bygger på samma procent-/autoregleringsmatematik som standardprogrammet.",
+  "lifts": {
+    "squat": {
+      "name": "Knäböj",
+      "group": "squat",
+      "isMain": true,
+      "setScheme": "autoregulated"
+    },
+    "bench": {
+      "name": "Bänkpress",
+      "group": "bench",
+      "isMain": true,
+      "setScheme": "autoregulated"
+    },
+    "deadlift": {
+      "name": "Marklyft",
+      "group": "deadlift",
+      "isMain": true,
+      "setScheme": "autoregulated"
+    },
+    "ohp": {
+      "name": "Militärpress",
+      "group": "ohp",
+      "isMain": true,
+      "setScheme": "autoregulated"
+    },
+    "frontSquat": {
+      "name": "Frontböj",
+      "group": "squat",
+      "isMain": false,
+      "setScheme": "autoregulated"
+    },
+    "pausedSquat": {
+      "name": "Knäböj (paus)",
+      "group": "squat",
+      "isMain": false,
+      "setScheme": "autoregulated"
+    },
+    "closeGripBench": {
+      "name": "Bänkpress (smalt grepp)",
+      "group": "bench",
+      "isMain": false,
+      "setScheme": "autoregulated"
+    },
+    "inclinePress": {
+      "name": "Lutande bänkpress",
+      "group": "bench",
+      "isMain": false,
+      "setScheme": "autoregulated"
+    },
+    "sumoDeadlift": {
+      "name": "Marklyft (sumo)",
+      "group": "deadlift",
+      "isMain": false,
+      "setScheme": "autoregulated"
+    },
+    "pushPress": {
+      "name": "Push press",
+      "group": "ohp",
+      "isMain": false,
+      "setScheme": "autoregulated"
+    },
+    "nordicCurl": {
+      "name": "Nordic hamstring curls",
+      "group": "deadlift",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 3,
+      "targetReps": 6,
+      "bodyweight": true
+    }
+  },
+  "dayTemplates": {
+    "2": [
+      [
+        "squat",
+        "bench",
+        "sumoDeadlift",
+        "pushPress"
+      ],
+      [
+        "deadlift",
+        "ohp",
+        "frontSquat",
+        "closeGripBench"
+      ]
+    ],
+    "3": [
+      [
+        "squat",
+        "sumoDeadlift",
+        "inclinePress"
+      ],
+      [
+        "bench",
+        "ohp",
+        "frontSquat"
+      ],
+      [
+        "deadlift",
+        "closeGripBench",
+        "pausedSquat",
+        "pushPress"
+      ]
+    ],
+    "4": [
+      [
+        "squat",
+        "inclinePress",
+        "nordicCurl"
+      ],
+      [
+        "bench",
+        "frontSquat",
+        "pushPress"
+      ],
+      [
+        "deadlift",
+        "closeGripBench"
+      ],
+      [
+        "ohp",
+        "pausedSquat"
+      ]
+    ],
+    "5": [
+      [
+        "squat",
+        "pushPress"
+      ],
+      [
+        "bench",
+        "frontSquat"
+      ],
+      [
+        "deadlift",
+        "closeGripBench"
+      ],
+      [
+        "ohp",
+        "pausedSquat"
+      ],
+      [
+        "inclinePress",
+        "sumoDeadlift"
+      ]
+    ],
+    "6": [
+      [
+        "squat",
+        "closeGripBench"
+      ],
+      [
+        "pushPress",
+        "sumoDeadlift"
+      ],
+      [
+        "bench",
+        "frontSquat"
+      ],
+      [
+        "inclinePress",
+        "pausedSquat"
+      ],
+      [
+        "deadlift"
+      ],
+      [
+        "ohp"
+      ]
+    ]
+  },
+  "weekMainIntensity": [
+    0.7,
+    0.75,
+    0.8,
+    0.725,
+    0.775,
+    0.825,
+    0.6,
+    0.75,
+    0.8,
+    0.85,
+    0.775,
+    0.825,
+    0.875,
+    0.6,
+    0.8,
+    0.85,
+    0.9,
+    0.85,
+    0.9,
+    0.95,
+    0.6
+  ],
+  "variationOffset": -0.1,
+  "percentChart": [
+    {
+      "pct": 0.5,
+      "reps": 8,
+      "rir": 5
+    },
+    {
+      "pct": 0.525,
+      "reps": 8,
+      "rir": 5
+    },
+    {
+      "pct": 0.55,
+      "reps": 8,
+      "rir": 5
+    },
+    {
+      "pct": 0.575,
+      "reps": 8,
+      "rir": 5
+    },
+    {
+      "pct": 0.6,
+      "reps": 7,
+      "rir": 4
+    },
+    {
+      "pct": 0.625,
+      "reps": 7,
+      "rir": 4
+    },
+    {
+      "pct": 0.65,
+      "reps": 6,
+      "rir": 4
+    },
+    {
+      "pct": 0.675,
+      "reps": 6,
+      "rir": 4
+    },
+    {
+      "pct": 0.7,
+      "reps": 5,
+      "rir": 3
+    },
+    {
+      "pct": 0.725,
+      "reps": 5,
+      "rir": 3
+    },
+    {
+      "pct": 0.75,
+      "reps": 4,
+      "rir": 3
+    },
+    {
+      "pct": 0.775,
+      "reps": 4,
+      "rir": 3
+    },
+    {
+      "pct": 0.8,
+      "reps": 3,
+      "rir": 2
+    },
+    {
+      "pct": 0.825,
+      "reps": 3,
+      "rir": 2
+    },
+    {
+      "pct": 0.85,
+      "reps": 2,
+      "rir": 2
+    },
+    {
+      "pct": 0.875,
+      "reps": 2,
+      "rir": 2
+    },
+    {
+      "pct": 0.9,
+      "reps": 1,
+      "rir": 1
+    },
+    {
+      "pct": 0.925,
+      "reps": 1,
+      "rir": 1
+    },
+    {
+      "pct": 0.95,
+      "reps": 1,
+      "rir": 1
+    },
+    {
+      "pct": 0.975,
+      "reps": 1,
+      "rir": 0
+    },
+    {
+      "pct": 1.0,
+      "reps": 1,
+      "rir": 0
+    }
+  ],
+  "defaultThresholds": {
+    "lower": 4,
+    "upper": 6,
+    "increasePct": 0.02,
+    "decreasePct": -0.05
+  },
+  "defaultSettings": {
+    "frequency": 4,
+    "rounding": 2.5,
+    "singleAt8Percent": 0.9,
+    "unit": "kg"
+  },
+  "dayPrep": {
+    "4": [
+      {
+        "mobility": [
+          {
+            "name": "90/90 Hip Switch",
+            "setsReps": "8/sida"
+          },
+          {
+            "name": "Adductor Rockback",
+            "setsReps": "8/sida"
+          },
+          {
+            "name": "Deep Squat Hold",
+            "setsReps": "30-45s"
+          },
+          {
+            "name": "Bodyweight Squat",
+            "setsReps": "10"
+          }
+        ],
+        "explosive": [
+          {
+            "name": "Box Jump",
+            "setsReps": "3x3"
+          }
+        ],
+        "extras": [
+          {
+            "name": "Pull-ups (superset)",
+            "setsReps": "2-3x6-8"
+          },
+          {
+            "name": "Lateral Raise (superset)",
+            "setsReps": "2-3x10-15"
+          }
+        ]
+      },
+      {
+        "mobility": [
+          {
+            "name": "World's Greatest Stretch",
+            "setsReps": "5/sida"
+          },
+          {
+            "name": "Ankle Rocks",
+            "setsReps": "10/sida"
+          },
+          {
+            "name": "Glute Bridge",
+            "setsReps": "10"
+          },
+          {
+            "name": "Band Pull-Apart",
+            "setsReps": "15"
+          }
+        ],
+        "explosive": [
+          {
+            "name": "Rotational Med-Ball Throw",
+            "setsReps": "3x3/sida"
+          }
+        ],
+        "extras": [
+          {
+            "name": "Dead Hang",
+            "setsReps": "2x30-60s"
+          }
+        ]
+      },
+      {
+        "mobility": [
+          {
+            "name": "90/90 Hip Switch",
+            "setsReps": "8/sida"
+          },
+          {
+            "name": "Thoracic Rotation",
+            "setsReps": "6/sida"
+          },
+          {
+            "name": "Band Dislocates",
+            "setsReps": "10"
+          },
+          {
+            "name": "Scapular Pull-ups",
+            "setsReps": "8"
+          }
+        ],
+        "explosive": [
+          {
+            "name": "Broad Jump",
+            "setsReps": "3x3"
+          }
+        ],
+        "extras": [
+          {
+            "name": "Chest-Supported Row (superset)",
+            "setsReps": "3x6-8"
+          },
+          {
+            "name": "Lateral Raise (superset)",
+            "setsReps": "3x10-15"
+          },
+          {
+            "name": "Valfri biceps/triceps",
+            "setsReps": "2x6-10"
+          }
+        ]
+      },
+      {
+        "mobility": [
+          {
+            "name": "Adductor Rockback",
+            "setsReps": "8/sida"
+          },
+          {
+            "name": "Couch Stretch",
+            "setsReps": "30s/sida"
+          },
+          {
+            "name": "Ankle Rocks",
+            "setsReps": "10/sida"
+          },
+          {
+            "name": "Cossack Squat",
+            "setsReps": "5/sida"
+          }
+        ],
+        "explosive": [
+          {
+            "name": "Med-Ball Chest Throw",
+            "setsReps": "3x3"
+          }
+        ],
+        "extras": [
+          {
+            "name": "Bulgarian Split Squat",
+            "setsReps": "2x6/ben"
+          },
+          {
+            "name": "Farmer's Walk",
+            "setsReps": "3x30-40m"
+          },
+          {
+            "name": "Dead Hang",
+            "setsReps": "2x30-60s"
+          }
+        ]
+      }
+    ]
+  },
+  "accessorySuggestions": [
+    "Skivstångsrodd",
+    "Hantelrodd",
+    "Sittande kabelrodd (chest supported)",
+    "T-bar rodd",
+    "Pull-ups",
+    "Chins",
+    "Pull-ups (neutralt grepp)",
+    "Neddrag i block"
+  ]
+}

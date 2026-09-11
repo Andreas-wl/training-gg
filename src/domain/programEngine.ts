@@ -5,7 +5,7 @@
  * konstanter, så att olika program (t.ex. uppladdade av användaren) kan
  * driva samma beräkningar.
  */
-import type { PercentRow, Program } from './types';
+import type { LiftDefinition, PercentRow, Program } from './types';
 
 export function cycleLength(program: Program): number {
   return program.weekMainIntensity.length;
@@ -33,7 +33,13 @@ export function blockWaveLabel(program: Program, absoluteWeek: number): BlockWav
   }
   const wave = withinBlock <= 3 ? 1 : 2;
   const weekInWave = withinBlock <= 3 ? withinBlock : withinBlock - 3;
-  return { block, wave, weekInWave, deload: false, text: `Block ${block}, våg ${wave}, vecka ${weekInWave}/3` };
+  return {
+    block,
+    wave,
+    weekInWave,
+    deload: false,
+    text: `Block ${block}, våg ${wave}, vecka ${weekInWave}/3`,
+  };
 }
 
 export function intensityFor(program: Program, liftKey: string, absoluteWeek: number): number {
@@ -53,7 +59,10 @@ export function percentRow(program: Program, pct: number): PercentRow {
   let bestDiff = Infinity;
   for (const row of program.percentChart) {
     const diff = Math.abs(row.pct - stepped);
-    if (diff < bestDiff) { bestDiff = diff; best = row; }
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = row;
+    }
   }
   return best;
 }
@@ -66,6 +75,27 @@ export function computeWeight(max: number | null | undefined, pct: number, round
 export function roundTo(value: number | null | undefined, rounding: number): number | null | undefined {
   if (value == null || !rounding) return value;
   return Math.round(value / rounding) * rounding;
+}
+
+// Målreps och målvikt på ett ställe, så ExerciseScreen (som visar målet) och
+// addSet (som stämplar in målet i setet) aldrig kan räkna olika - gör de det
+// flaggas varje set felaktigt som "justerat".
+//
+// Ett 'fixed' kroppsviktslyft (t.ex. Nordic curls) har inget max att räkna
+// procent på: målvikten är 0, vilket UI:t visar som "kroppsvikt".
+export function targetRepsFor(lift: LiftDefinition, program: Program, pct: number): number {
+  if (lift.setScheme === 'fixed' && lift.targetReps != null) return lift.targetReps;
+  return percentRow(program, pct).reps;
+}
+
+export function targetWeightFor(
+  lift: LiftDefinition,
+  max: number | null | undefined,
+  pct: number,
+  rounding: number,
+): number | null {
+  if (lift.bodyweight) return 0;
+  return computeWeight(max, pct, rounding);
 }
 
 // Ett set räknas som "hårt" om man inte klarade fler reps än vad %-tabellen

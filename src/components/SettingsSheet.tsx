@@ -59,7 +59,8 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
 
   const liftOrder = Object.keys(program.lifts);
   const mainKeys = liftOrder.filter((k) => program.lifts[k].isMain);
-  const variantKeys = liftOrder.filter((k) => !program.lifts[k].isMain);
+  // Kroppsviktslyft har inget max att fylla i - de räknas inte på procent.
+  const variantKeys = liftOrder.filter((k) => !program.lifts[k].isMain && !program.lifts[k].bodyweight);
 
   return (
     <Sheet title="Inställningar" onClose={onClose}>

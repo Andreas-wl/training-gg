@@ -8,10 +8,16 @@ export interface LiftDefinition {
   group: string;
   isMain: boolean;
   setScheme: 'autoregulated' | 'fixed';
+  // Kroppsviktslyft (t.ex. Nordic curls) har inget skivstångsmax att räkna
+  // procent på - då är målvikten alltid 0 och UI:t säger "kroppsvikt".
+  bodyweight?: boolean;
   // 'autoregulated' (SBS): inget fast antal set i förväg - antalet set man
   //   klarade är själva mätvärdet (jämförs mot defaultThresholds).
   // 'fixed' (t.ex. klassiskt 5×5): targetSets är känt i förväg.
   targetSets?: number;
+  // Endast för 'fixed': %-tabellen är meningslös för ett lyft som inte körs
+  // på procent av ett max, så repsmålet anges explicit.
+  targetReps?: number;
 }
 
 export interface PercentRow {
@@ -34,6 +40,21 @@ export interface Settings {
   unit: string;
 }
 
+// Passmall utanför skivstången: det som körs före (mobility + explosivt) och
+// efter (tillägg) SBS-lyften. Ligger i programmet eftersom det är data, precis
+// som accessorySuggestions - men seedas in i användarens egen plan så den kan
+// redigeras fritt. Nyckeln är frekvens (som dayTemplates), arrayen är per dag.
+export interface DayPrepTemplate {
+  mobility?: PlannedItem[];
+  explosive?: PlannedItem[];
+  extras?: PlannedItem[];
+}
+
+export interface PlannedItem {
+  name: string;
+  setsReps?: string;
+}
+
 export interface Program {
   id: string;
   name: string;
@@ -46,6 +67,7 @@ export interface Program {
   defaultThresholds: Thresholds;
   defaultSettings: Settings;
   accessorySuggestions?: string[];
+  dayPrep?: Record<number, DayPrepTemplate[]>;
 }
 
 // Set-nivå-loggning (etapp 4, PLAN.md #5) - varje set bär sitt eget snapshot
@@ -68,11 +90,20 @@ export interface LiftLog {
   testSingle?: number | null;
   notes?: string;
   sets: SetEntry[];
+  // Autoregleringsförslaget för DEN HÄR veckan är redan tillämpat. Utan
+  // detta går förslaget att trycka på om och om igen (det räknas ut från
+  // hårda set kontra trösklar, vilket inte ändras av att maxet höjs), så
+  // maxet skulle kunna trappas upp flera steg av misstag.
+  autoregApplied?: { newMax: number; appliedAt: string };
 }
 
 export interface AccessorySlot {
   id: string;
   name: string;
+  // Planerat set/reps från programmet ("3x6-8"). Används bara som förslag
+  // när det inte finns någon logg för veckan - faktiska värden bor i
+  // AccessoryLog, per vecka.
+  setsReps?: string;
 }
 
 export interface AccessoryLog {
@@ -86,6 +117,10 @@ export interface AccessoryLog {
 export interface WarmupItem {
   id: string;
   name: string;
+  // Passordningen är mobility -> explosivt -> SBS -> tillägg. Båda
+  // för-pass-blocken delar samma lista och skiljs på `kind` (saknas det
+  // räknas raden som mobility, dvs gamla sparade rader hamnar rätt).
+  kind?: 'mobility' | 'explosive';
   setsReps?: string;
   weight?: string;
 }
@@ -107,5 +142,10 @@ export interface TrainingState {
   warmupPlan: Record<number, WarmupItem[]>;
   warmupLogs: Record<string, WarmupLog>;
   favoriteBackExercise: string;
+  // Markör för att programmets dayPrep redan har seedats in i
+  // warmupPlan/accessoryPlan ("<programId>:<frekvens>"). Utan den skulle
+  // seedningen köra igen och skapa dubbletter med nya id:n (makeId() är
+  // tidsbaserad), vilket dessutom skulle orphana veckans loggar.
+  seededPrepFor?: string;
   logs: Record<string, LiftLog>;
 }

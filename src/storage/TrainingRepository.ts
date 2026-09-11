@@ -1,5 +1,13 @@
 import type { StorageAdapter } from './StorageAdapter';
-import type { AccessorySlot, AccessoryLog, LiftLog, Program, TrainingState, WarmupItem, WarmupLog } from '../domain/types';
+import type {
+  AccessorySlot,
+  AccessoryLog,
+  LiftLog,
+  Program,
+  TrainingState,
+  WarmupItem,
+  WarmupLog,
+} from '../domain/types';
 
 const STORAGE_KEY = 'sbsTrainerData_v1';
 const CUSTOM_PROGRAMS_KEY = 'sbsCustomPrograms_v1';
@@ -7,7 +15,9 @@ const ACTIVE_PROGRAM_ID_KEY = 'sbsActiveProgramId_v1';
 
 function defaultState(program: Program): TrainingState {
   const maxes: TrainingState['maxes'] = {};
-  Object.keys(program.lifts).forEach((k) => { maxes[k] = null; });
+  Object.keys(program.lifts).forEach((k) => {
+    maxes[k] = null;
+  });
   return {
     version: 1,
     settings: { ...program.defaultSettings },
@@ -24,6 +34,54 @@ function defaultState(program: Program): TrainingState {
   };
 }
 
+// Seedar programmets passmall (mobility + explosivt före, tillägg efter) in i
+// användarens egna planer. Bara dagar som saknar rader berörs, och bara en
+// gång per program+frekvens (se TrainingState.seededPrepFor) - allt man sedan
+// redigerar eller tar bort ska stanna borta.
+//
+// OBS: warmupPlan/accessoryPlan är nycklade på dagindex, INTE på frekvens,
+// men dayPrep är (som dayTemplates) nycklad på frekvens och finns bara för 4
+// dagar/vecka. Markören innehåller därför frekvensen: kör man 3 dagar/vecka
+// seedas ingenting, och byter man sedan till 4 ändras markören så seedningen
+// får en ny chans. Innehållet följer alltså inte med mellan frekvenser - det
+// är en 4-dagarsmall, inte en generell.
+function seedDayPrep(state: TrainingState, program: Program): TrainingState {
+  const freq = state.settings.frequency;
+  const marker = `${program.id}:${freq}`;
+  if (state.seededPrepFor === marker) return state;
+
+  const template = program.dayPrep?.[freq];
+  if (!template) return { ...state, seededPrepFor: marker };
+
+  const warmupPlan = { ...state.warmupPlan };
+  const accessoryPlan = { ...state.accessoryPlan };
+
+  template.forEach((day, dayIndex) => {
+    if (!warmupPlan[dayIndex]?.length) {
+      const items: WarmupItem[] = [
+        ...(day.mobility ?? []).map((i) => ({
+          id: makeId(),
+          name: i.name,
+          kind: 'mobility' as const,
+          setsReps: i.setsReps,
+        })),
+        ...(day.explosive ?? []).map((i) => ({
+          id: makeId(),
+          name: i.name,
+          kind: 'explosive' as const,
+          setsReps: i.setsReps,
+        })),
+      ];
+      if (items.length) warmupPlan[dayIndex] = items;
+    }
+    if (!accessoryPlan[dayIndex]?.length && day.extras?.length) {
+      accessoryPlan[dayIndex] = day.extras.map((i) => ({ id: makeId(), name: i.name, setsReps: i.setsReps }));
+    }
+  });
+
+  return { ...state, warmupPlan, accessoryPlan, seededPrepFor: marker };
+}
+
 export function makeId(): string {
   return `a${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -32,9 +90,10 @@ export function makeId(): string {
 // {dayIndex: [{name,setsReps,weight}]} utan historik per vecka. Migreras in
 // i den nya planen + en vecka-1-logg så inget tappas. Ren port av
 // legacy/app.js migrateOldAccessories.
-function migrateOldAccessories(
-  parsed: Record<string, unknown>,
-): { plan: Record<number, AccessorySlot[]>; logs: Record<string, AccessoryLog> } {
+function migrateOldAccessories(parsed: Record<string, unknown>): {
+  plan: Record<number, AccessorySlot[]>;
+  logs: Record<string, AccessoryLog>;
+} {
   if (parsed.accessoryPlan) {
     return {
       plan: parsed.accessoryPlan as Record<number, AccessorySlot[]>,
@@ -43,12 +102,17 @@ function migrateOldAccessories(
   }
   const plan: Record<number, AccessorySlot[]> = {};
   const logs: Record<string, AccessoryLog> = {};
-  const oldAccessories = (parsed.accessories as Record<string, { name?: string; setsReps?: string; weight?: string }[]>) || {};
+  const oldAccessories =
+    (parsed.accessories as Record<string, { name?: string; setsReps?: string; weight?: string }[]>) || {};
   Object.entries(oldAccessories).forEach(([dayIndex, rows]) => {
     plan[Number(dayIndex)] = rows.map((row) => {
       const id = makeId();
       if (row.setsReps || row.weight) {
-        logs[`acc_${id}_w1`] = { name: row.name || '', setsReps: row.setsReps || '', weight: row.weight || '' };
+        logs[`acc_${id}_w1`] = {
+          name: row.name || '',
+          setsReps: row.setsReps || '',
+          weight: row.weight || '',
+        };
       }
       return { id, name: row.name || '' };
     });
@@ -108,23 +172,35 @@ export class TrainingRepository {
     const base = defaultState(program);
     try {
       const parsed = await this.storage.getItem<Record<string, unknown>>(STORAGE_KEY);
-      if (!parsed) return base;
+      if (!parsed) return seedDayPrep(base, program);
 
       const { plan, logs: accLogs } = migrateOldAccessories(parsed);
-      return {
-        ...base,
-        ...parsed,
-        settings: { ...base.settings, ...((parsed.settings as Partial<TrainingState['settings']>) || {}) },
-        maxes: { ...base.maxes, ...((parsed.maxes as Partial<TrainingState['maxes']>) || {}) } as TrainingState['maxes'],
-        thresholds: { ...base.thresholds, ...((parsed.thresholds as Partial<TrainingState['thresholds']>) || {}) },
-        accessoryPlan: plan,
-        accessoryLogs: accLogs,
-        warmupPlan: (parsed.warmupPlan as Record<number, WarmupItem[]>) || {},
-        warmupLogs: (parsed.warmupLogs as Record<string, WarmupLog>) || {},
-        logs: migrateLogs(parsed.logs as Record<string, unknown> | undefined),
-      };
+      return seedDayPrep(
+        {
+          ...base,
+          ...parsed,
+          settings: { ...base.settings, ...((parsed.settings as Partial<TrainingState['settings']>) || {}) },
+          maxes: {
+            ...base.maxes,
+            ...((parsed.maxes as Partial<TrainingState['maxes']>) || {}),
+          } as TrainingState['maxes'],
+          thresholds: {
+            ...base.thresholds,
+            ...((parsed.thresholds as Partial<TrainingState['thresholds']>) || {}),
+          },
+          accessoryPlan: plan,
+          accessoryLogs: accLogs,
+          warmupPlan: (parsed.warmupPlan as Record<number, WarmupItem[]>) || {},
+          warmupLogs: (parsed.warmupLogs as Record<string, WarmupLog>) || {},
+          logs: migrateLogs(parsed.logs as Record<string, unknown> | undefined),
+        },
+        program,
+      );
     } catch (e) {
       console.error('Kunde inte läsa sparad data, återställer till standard.', e);
+      // Medvetet OSEEDAT: en trasig lagringspost får inte leda till att
+      // markören sätts på ett state som just tappade allt - då hade
+      // seedningen aldrig kunnat köra igen.
       return base;
     }
   }

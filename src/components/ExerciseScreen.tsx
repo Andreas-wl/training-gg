@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useTraining } from '../state/TrainingProvider';
-import { computeWeight, intensityFor, percentRow, roundTo } from '../domain/programEngine';
+import { intensityFor, percentRow, roundTo, targetRepsFor, targetWeightFor } from '../domain/programEngine';
 import type { LiftKey } from '../domain/types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -21,7 +21,8 @@ export function ExerciseScreen({
   onClose: () => void;
   onOpenLift: (liftKey: LiftKey) => void;
 }) {
-  const { state, program, updateLog, removeSet, autoregSuggestion, applyMax } = useTraining();
+  const { state, program, updateLog, addSet, removeSet, autoregSuggestion, applyMax, applyAutoreg } =
+    useTraining();
   const testSingleRef = useRef<HTMLInputElement>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -33,9 +34,10 @@ export function ExerciseScreen({
   const max = state.maxes[liftKey];
 
   const pct = intensityFor(program, liftKey, week);
-  const { reps: targetReps, rir } = percentRow(program, pct);
+  const { rir } = percentRow(program, pct);
+  const targetReps = targetRepsFor(lift, program, pct);
   const effectiveMax = log?.testSingle ? log.testSingle / state.settings.singleAt8Percent : max;
-  const targetWeight = computeWeight(effectiveMax, pct, state.settings.rounding);
+  const targetWeight = targetWeightFor(lift, effectiveMax, pct, state.settings.rounding);
 
   const suggestion = autoregSuggestion(liftKey, week);
 
@@ -49,6 +51,16 @@ export function ExerciseScreen({
   // targetSets kommer bara från 'fixed'-lyft; faller snällt tillbaka om det
   // saknas (finns inga fixed-lyft i standardprogrammet, se PLAN.md).
   const targetSets = lift.setScheme === 'fixed' ? lift.targetSets : undefined;
+
+  // Kroppsviktslyft har ingen vikt att visa eller mata in - varken målvikt,
+  // singel@RPE8-test eller autoreglering är meningsfullt där.
+  const unit = state.settings.unit;
+  const weightLabel = lift.bodyweight
+    ? 'Kroppsvikt'
+    : targetWeight != null
+      ? `${targetWeight} ${unit}`
+      : 'Sätt max';
+  const setWeightLabel = (weight: number) => (lift.bodyweight ? 'Kroppsvikt' : `${weight} ${unit}`);
 
   return (
     <>
@@ -68,21 +80,25 @@ export function ExerciseScreen({
       </div>
 
       <Card className="mb-4 p-4">
-        <div className="mb-3 grid grid-cols-3 gap-2 rounded-xl bg-app p-3">
+        <div
+          className={`mb-3 grid gap-2 rounded-xl bg-app p-3 ${lift.bodyweight ? 'grid-cols-2' : 'grid-cols-3'}`}
+        >
           <div className="text-center">
             <span className="block text-[11px] text-dim">Vikt</span>
-            <span className="mt-0.5 block text-base font-semibold text-ink">
-              {targetWeight != null ? `${targetWeight} ${state.settings.unit}` : 'Sätt max'}
-            </span>
+            <span className="mt-0.5 block text-base font-semibold text-ink">{weightLabel}</span>
           </div>
           <div className="text-center">
             <span className="block text-[11px] text-dim">Reps</span>
             <span className="mt-0.5 block text-base font-semibold text-ink">{targetReps}</span>
           </div>
-          <div className="text-center">
-            <span className="block text-[11px] text-dim">RIR</span>
-            <span className="mt-0.5 block text-base font-semibold text-ink">{rir}</span>
-          </div>
+          {/* RIR kommer från %-tabellen och betyder inget för ett lyft som
+              inte körs på procent av ett max. */}
+          {!lift.bodyweight && (
+            <div className="text-center">
+              <span className="block text-[11px] text-dim">RIR</span>
+              <span className="mt-0.5 block text-base font-semibold text-ink">{rir}</span>
+            </div>
+          )}
         </div>
         <div className="text-xs text-dim">
           {lift.setScheme === 'fixed' && targetSets
@@ -91,40 +107,43 @@ export function ExerciseScreen({
         </div>
       </Card>
 
-      <Card className="mb-4 p-4">
-        <label className="mb-1 block text-xs text-dim">Testade du en singel @RPE8 idag? (valfritt)</label>
-        <div className="flex flex-wrap gap-2">
-          <input
-            key={logKey}
-            ref={testSingleRef}
-            type="number"
-            step={0.5}
-            className={`${inputClass} w-24 flex-none`}
-            placeholder="vikt"
-            defaultValue={log?.testSingle ?? ''}
-            onBlur={(e) => {
-              const val = e.target.value === '' ? null : Number(e.target.value);
-              updateLog(liftKey, week, { testSingle: val });
-            }}
-          />
-          <Button
-            variant="secondary"
-            className="flex-1 text-xs"
-            onClick={() => {
-              const val = Number(testSingleRef.current?.value);
-              if (!val) return;
-              const newMax = roundTo(val / state.settings.singleAt8Percent, state.settings.rounding);
-              if (newMax != null) applyMax(liftKey, newMax);
-            }}
-          >
-            Använd som nytt max
-          </Button>
-        </div>
-      </Card>
+      {!lift.bodyweight && (
+        <Card className="mb-4 p-4">
+          <label className="mb-1 block text-xs text-dim">Testade du en singel @RPE8 idag? (valfritt)</label>
+          <div className="flex flex-wrap gap-2">
+            <input
+              key={logKey}
+              ref={testSingleRef}
+              type="number"
+              step={0.5}
+              className={`${inputClass} w-24 flex-none`}
+              placeholder="vikt"
+              defaultValue={log?.testSingle ?? ''}
+              onBlur={(e) => {
+                const val = e.target.value === '' ? null : Number(e.target.value);
+                updateLog(liftKey, week, { testSingle: val });
+              }}
+            />
+            <Button
+              variant="secondary"
+              className="flex-1 text-xs"
+              onClick={() => {
+                const val = Number(testSingleRef.current?.value);
+                if (!val) return;
+                const newMax = roundTo(val / state.settings.singleAt8Percent, state.settings.rounding);
+                if (newMax != null) applyMax(liftKey, newMax);
+              }}
+            >
+              Använd som nytt max
+            </Button>
+          </div>
+        </Card>
+      )}
 
       <Card className="mb-4 p-4">
         <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-dim">
-          Set{lift.setScheme === 'fixed' && targetSets ? ` (mål: ${targetSets} set × ${targetReps} reps)` : ''}
+          Set
+          {lift.setScheme === 'fixed' && targetSets ? ` (mål: ${targetSets} set × ${targetReps} reps)` : ''}
         </h3>
 
         {sets.map((set, i) => (
@@ -133,7 +152,7 @@ export function ExerciseScreen({
             className="mb-2 flex items-center justify-between gap-2 rounded-xl bg-app px-3 py-2 last:mb-0"
           >
             <span className="text-[15px] text-ink">
-              Set {i + 1}: {set.weight} {state.settings.unit} × {set.reps ?? '–'} reps
+              Set {i + 1}: {setWeightLabel(set.weight)} × {set.reps ?? '–'} reps
               {set.adjusted && <span className="ml-2 text-xs text-danger">⚠ justerat</span>}
             </span>
             <button
@@ -146,23 +165,46 @@ export function ExerciseScreen({
           </div>
         ))}
 
+        {/* Nästa set ligger alltid förifyllt med det beräknade målet - i SBS
+            vet man inte antalet set i förväg, så flödet är "kör setet, bocka
+            av" i ett tryck. Sheeten öppnas bara när man faktiskt avviker.
+            Förifyllningen kommer från målet, aldrig från föregående sets
+            faktiska värden (se PLAN.md #5). */}
+        <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-dashed border-black/10 bg-app px-3 py-2">
+          <span className="text-[15px] text-ink">
+            Set {sets.length + 1}: {weightLabel} × {targetReps} reps
+          </span>
+          <div className="flex flex-shrink-0 items-center gap-2">
+            <button
+              className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-accent shadow-sm"
+              onClick={() => setSheetOpen(true)}
+            >
+              Justera
+            </button>
+            <button
+              className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white shadow-sm disabled:opacity-40"
+              disabled={targetWeight == null}
+              onClick={() => targetWeight != null && addSet(liftKey, week, targetWeight, targetReps)}
+            >
+              Klart
+            </button>
+          </div>
+        </div>
+
+        {/* Resterande set i ett fast schema visas som grå platshållare. */}
         {lift.setScheme === 'fixed' &&
           targetSets != null &&
-          targetSets > sets.length &&
-          Array.from({ length: targetSets - sets.length }).map((_, j) => (
+          targetSets > sets.length + 1 &&
+          Array.from({ length: targetSets - sets.length - 1 }).map((_, j) => (
             <div
               key={`placeholder_${j}`}
               className="mb-2 flex items-center justify-between gap-2 rounded-xl bg-app/60 px-3 py-2 text-dim last:mb-0"
             >
               <span className="text-[15px]">
-                Set {sets.length + j + 1}: {targetWeight != null ? `${targetWeight} ${state.settings.unit}` : '–'} × –
+                Set {sets.length + j + 2}: {weightLabel} × –
               </span>
             </div>
           ))}
-
-        <Button variant="secondary" className="mt-2 w-full" onClick={() => setSheetOpen(true)}>
-          + Logga set
-        </Button>
       </Card>
 
       {suggestion && (
@@ -177,10 +219,16 @@ export function ExerciseScreen({
           </span>
           <button
             className="rounded-full bg-app px-3 py-1 text-xs font-semibold text-ink"
-            onClick={() => applyMax(liftKey, suggestion.newMax)}
+            onClick={() => applyAutoreg(liftKey, week, suggestion.newMax)}
           >
             Använd
           </button>
+        </div>
+      )}
+
+      {log?.autoregApplied && (
+        <div className="mb-4 rounded-2xl bg-white px-4 py-3 text-sm text-success shadow-sm">
+          ✓ Justerat: nytt max {log.autoregApplied.newMax} {state.settings.unit}
         </div>
       )}
 
@@ -211,6 +259,7 @@ export function ExerciseScreen({
           setNumber={sets.length + 1}
           targetWeight={targetWeight ?? 0}
           targetReps={targetReps}
+          bodyweight={lift.bodyweight}
           onClose={() => setSheetOpen(false)}
         />
       )}

@@ -1,10 +1,18 @@
 import { useEffect } from 'react';
 import { useTraining } from '../state/TrainingProvider';
-import { blockWaveLabel, computeWeight, cycleLength, effectiveWeek, intensityFor, percentRow } from '../domain/programEngine';
+import {
+  blockWaveLabel,
+  cycleLength,
+  effectiveWeek,
+  intensityFor,
+  targetRepsFor,
+  targetWeightFor,
+} from '../domain/programEngine';
 import type { LiftKey } from '../domain/types';
 import { AccessoriesBlock } from './AccessoriesBlock';
 import { WarmupBlock } from './WarmupBlock';
 import { Card } from '../ui/Card';
+import { SectionHeader } from '../ui/SectionHeader';
 
 // Dagöversikt (PLAN.md #8.2) - en lätt lista, inte fulla lyftkort. Klick på
 // en rad öppnar övnings-detaljvyn (ExerciseScreen) via onOpenLift, som styrs
@@ -15,14 +23,19 @@ function LiftRow({ liftKey, week, onOpen }: { liftKey: LiftKey; week: number; on
   const log = state.logs[`${liftKey}_w${week}`];
 
   const pct = intensityFor(program, liftKey, week);
-  const { reps } = percentRow(program, pct);
+  const reps = targetRepsFor(lift, program, pct);
   const max = state.maxes[liftKey];
   const effectiveMax = log?.testSingle ? log.testSingle / state.settings.singleAt8Percent : max;
-  const weight = computeWeight(effectiveMax, pct, state.settings.rounding);
+  const weight = targetWeightFor(lift, effectiveMax, pct, state.settings.rounding);
 
   const setCount = log?.sets?.length ?? 0;
   const badge = lift.isMain ? 'Huvudlyft' : `Variant · ${program.lifts[lift.group]?.name ?? ''}`;
-  const status = setCount > 0 ? `${setCount} set loggade` : weight != null ? `${weight} ${state.settings.unit} × ${reps}` : 'Sätt max';
+  const target = lift.bodyweight
+    ? `Kroppsvikt × ${reps}`
+    : weight != null
+      ? `${weight} ${state.settings.unit} × ${reps}`
+      : 'Sätt max';
+  const status = setCount > 0 ? `${setCount} set loggade` : target;
 
   return (
     <Card className="mb-3 cursor-pointer p-4 active:bg-app" onClick={onOpen}>
@@ -91,11 +104,31 @@ export function TodayScreen({ onOpenLift }: { onOpenLift: (liftKey: LiftKey) => 
         ))}
       </div>
 
-      <WarmupBlock dayIndex={dayIndex} week={state.currentWeek} />
+      {/* Passordningen är fast: mobility -> explosivt -> SBS -> tillägg. */}
+      <WarmupBlock
+        dayIndex={dayIndex}
+        week={state.currentWeek}
+        kind="mobility"
+        title="1 · Mobility (5-7 min)"
+        hint="Lägg till rörlighetsövningar du kör före passet."
+      />
+      <WarmupBlock
+        dayIndex={dayIndex}
+        week={state.currentWeek}
+        kind="explosive"
+        title="2 · Explosivt"
+        hint="Hopp/kast före skivstången, medan du är fräsch."
+      />
 
+      <SectionHeader title="3 · SBS" />
       <div className="mb-4">
         {days[dayIndex].map((liftKey) => (
-          <LiftRow key={liftKey} liftKey={liftKey} week={state.currentWeek} onOpen={() => onOpenLift(liftKey)} />
+          <LiftRow
+            key={liftKey}
+            liftKey={liftKey}
+            week={state.currentWeek}
+            onOpen={() => onOpenLift(liftKey)}
+          />
         ))}
       </div>
 

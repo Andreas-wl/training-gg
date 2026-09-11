@@ -1,14 +1,29 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { LocalStorageAdapter } from '../storage/LocalStorageAdapter';
 import { TrainingRepository, makeId } from '../storage/TrainingRepository';
-import type { AccessoryLog, LiftKey, LiftLog, Program, SetEntry, TrainingState, WarmupLog } from '../domain/types';
-import { computeWeight, intensityFor, isHardSet, percentRow, roundTo } from '../domain/programEngine';
+import type {
+  AccessoryLog,
+  LiftKey,
+  LiftLog,
+  Program,
+  SetEntry,
+  TrainingState,
+  WarmupLog,
+} from '../domain/types';
+import { intensityFor, isHardSet, roundTo, targetRepsFor, targetWeightFor } from '../domain/programEngine';
 import { validateProgram } from '../domain/validateProgram';
 import sbsDefaultJson from '../data/programs/sbs-default.json';
+import sbsMinVariantJson from '../data/programs/sbs-min-variant.json';
 
 // Standardprogrammet är alltid tillgängligt. Programbibliotek (etapp 5,
 // PLAN.md #10) lägger till möjligheten att importera/välja fler ovanpå det.
-const BUILT_IN_PROGRAMS: Program[] = [sbsDefaultJson as unknown as Program];
+// "Min variant" ligger först och är därmed aktiv som standard (se
+// TrainingRepository.getActiveProgramId) - standard-SBS lämnas orört så det
+// alltid går att jämföra mot originalet.
+const BUILT_IN_PROGRAMS: Program[] = [
+  sbsMinVariantJson as unknown as Program,
+  sbsDefaultJson as unknown as Program,
+];
 
 const repository = new TrainingRepository(new LocalStorageAdapter(), BUILT_IN_PROGRAMS);
 
@@ -68,6 +83,7 @@ interface TrainingContextValue {
   removeSet: (liftKey: LiftKey, week: number, position: number) => void;
   autoregSuggestion: (liftKey: LiftKey, week: number) => AutoregSuggestion | null;
   applyMax: (liftKey: LiftKey, newMax: number) => void;
+  applyAutoreg: (liftKey: LiftKey, week: number, newMax: number) => void;
   saveSettings: (patch: {
     settings: TrainingState['settings'];
     thresholds: TrainingState['thresholds'];
@@ -80,7 +96,7 @@ interface TrainingContextValue {
   renameAccessorySlot: (dayIndex: number, slotIndex: number, name: string) => void;
   updateAccessoryLog: (id: string, week: number, name: string, patch: Partial<AccessoryLog>) => void;
   previousAccessoryLog: (id: string, week: number) => AccessoryLog | null;
-  addWarmupItem: (dayIndex: number) => void;
+  addWarmupItem: (dayIndex: number, kind: 'mobility' | 'explosive') => void;
   removeWarmupItem: (dayIndex: number, itemIndex: number) => void;
   renameWarmupItem: (dayIndex: number, itemIndex: number, name: string) => void;
   updateWarmupLog: (id: string, week: number, name: string, patch: Partial<WarmupLog>) => void;
@@ -115,9 +131,40 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
 
   // Sparar varje gång state ändras, precis som legacy/app.js saveState()
   // efter varje mutation. Hoppar över den allra första (null -> laddat state).
+  //
+  // MEN: localStorage.setItem + JSON.stringify av HELA statet är synkront och
+  // blockar main thread. Det körde tidigare på varje state-ändring, dvs även
+  // på ett tryck på "Dag 2" eller ett flikbyte - det var den märkbara laggen.
+  // Nu samlas skrivningarna i ett fönster på 400 ms, med en direkt flush när
+  // appen göms/stängs så inget hinner tappas i en PWA som läggs i bakgrunden.
+  const pendingState = useRef<TrainingState | null>(null);
   useEffect(() => {
-    if (state) repository.saveState(state);
+    if (!state) return;
+    pendingState.current = state;
+    const timer = window.setTimeout(() => {
+      if (pendingState.current) {
+        repository.saveState(pendingState.current);
+        pendingState.current = null;
+      }
+    }, 400);
+    return () => window.clearTimeout(timer);
   }, [state]);
+
+  useEffect(() => {
+    const flush = () => {
+      if (pendingState.current) {
+        repository.saveState(pendingState.current);
+        pendingState.current = null;
+      }
+    };
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', flush);
+    return () => {
+      window.removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', flush);
+      flush();
+    };
+  }, []);
 
   const value = useMemo<TrainingContextValue | null>(() => {
     if (!state || !program) return null;
@@ -146,11 +193,14 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
         const existing = prev.logs[key];
         const sets = existing?.sets ?? [];
 
+        const lift = program.lifts[liftKey];
         const max = prev.maxes[liftKey];
         const pct = intensityFor(program, liftKey, week);
-        const { reps: targetReps } = percentRow(program, pct);
-        const effectiveMax = existing?.testSingle ? existing.testSingle / prev.settings.singleAt8Percent : max;
-        const targetWeight = computeWeight(effectiveMax, pct, prev.settings.rounding) ?? 0;
+        const targetReps = targetRepsFor(lift, program, pct);
+        const effectiveMax = existing?.testSingle
+          ? existing.testSingle / prev.settings.singleAt8Percent
+          : max;
+        const targetWeight = targetWeightFor(lift, effectiveMax, pct, prev.settings.rounding) ?? 0;
 
         const adjusted = weight !== targetWeight || reps !== targetReps;
         const newSet: SetEntry = {
@@ -186,7 +236,10 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
       if (program.lifts[liftKey]?.setScheme === 'fixed') return null;
 
       const key = logKeyFor(liftKey, week);
-      const sets = state.logs[key]?.sets ?? [];
+      const log = state.logs[key];
+      // Redan tillämpat den här veckan - visa inget nytt förslag.
+      if (log?.autoregApplied) return null;
+      const sets = log?.sets ?? [];
       if (sets.length === 0) return null;
 
       const hardSets = sets.filter((s) => isHardSet(s.targetReps, s.reps)).length;
@@ -209,6 +262,27 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
 
     const applyMax: TrainingContextValue['applyMax'] = (liftKey, newMax) => {
       setState((prev) => (prev ? { ...prev, maxes: { ...prev.maxes, [liftKey]: newMax } } : prev));
+    };
+
+    // Skild från applyMax (som används av singel@RPE8-knappen): här bockas
+    // veckans autoregleringsförslag av samtidigt som maxet skrivs, i samma
+    // setState, så förslaget inte kan tillämpas två gånger.
+    const applyAutoreg: TrainingContextValue['applyAutoreg'] = (liftKey, week, newMax) => {
+      setState((prev) => {
+        if (!prev) return prev;
+        const key = logKeyFor(liftKey, week);
+        const existing = prev.logs[key];
+        const merged: LiftLog = {
+          ...existing,
+          sets: existing?.sets ?? [],
+          autoregApplied: { newMax, appliedAt: new Date().toISOString() },
+        };
+        return {
+          ...prev,
+          maxes: { ...prev.maxes, [liftKey]: newMax },
+          logs: { ...prev.logs, [key]: merged },
+        };
+      });
     };
 
     const setCurrentWeek: TrainingContextValue['setCurrentWeek'] = (week) => {
@@ -290,13 +364,13 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
       return null;
     };
 
-    const addWarmupItem: TrainingContextValue['addWarmupItem'] = (dayIndex) => {
+    const addWarmupItem: TrainingContextValue['addWarmupItem'] = (dayIndex, kind) => {
       setState((prev) => {
         if (!prev) return prev;
         const items = prev.warmupPlan[dayIndex] || [];
         return {
           ...prev,
-          warmupPlan: { ...prev.warmupPlan, [dayIndex]: [...items, { id: makeId(), name: '' }] },
+          warmupPlan: { ...prev.warmupPlan, [dayIndex]: [...items, { id: makeId(), name: '', kind }] },
         };
       });
     };
@@ -343,7 +417,10 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
     };
 
     const resetAll: TrainingContextValue['resetAll'] = () => {
-      repository.clearState().then(() => repository.loadState(program)).then(setState);
+      repository
+        .clearState()
+        .then(() => repository.loadState(program))
+        .then(setState);
     };
 
     // Programbyte kan lämna currentWeek/currentDayIndex pekande fel om det
@@ -395,6 +472,7 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
       removeSet,
       autoregSuggestion,
       applyMax,
+      applyAutoreg,
       saveSettings,
       addAccessorySlot,
       addAccessorySlotWithName,

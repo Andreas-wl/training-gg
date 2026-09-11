@@ -70,9 +70,11 @@ export function HistoryScreen() {
         const adjustedCount = sets.filter((s) => s.adjusted).length;
         const setsText =
           sets.length > 0
-            ? `${sets.length} set${summary ? ` · ${summary.weight} ${state.settings.unit} × ${summary.reps ?? '–'}` : ''}${
-                adjustedCount > 0 ? ` (${adjustedCount} just.)` : ''
-              }`
+            ? `${sets.length} set${
+                summary
+                  ? ` · ${lift.bodyweight ? 'kroppsvikt' : `${summary.weight} ${state.settings.unit}`} × ${summary.reps ?? '–'}`
+                  : ''
+              }${adjustedCount > 0 ? ` (${adjustedCount} just.)` : ''}`
             : null;
 
         return (
@@ -86,7 +88,9 @@ export function HistoryScreen() {
               {setsText ? ` · ${setsText}` : ''}
             </div>
             {log.testSingle != null && (
-              <div className="mt-1 text-sm text-dim">Testad singel: {log.testSingle} {state.settings.unit}</div>
+              <div className="mt-1 text-sm text-dim">
+                Testad singel: {log.testSingle} {state.settings.unit}
+              </div>
             )}
             {log.notes && <div className="mt-1 text-sm text-dim">&quot;{log.notes}&quot;</div>}
           </Card>

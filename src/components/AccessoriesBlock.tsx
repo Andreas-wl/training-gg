@@ -1,7 +1,6 @@
 import { useTraining } from '../state/TrainingProvider';
-import { Card } from '../ui/Card';
-import { SectionHeader } from '../ui/SectionHeader';
 import { Button } from '../ui/Button';
+import { CollapsibleSection } from '../ui/CollapsibleSection';
 
 const inputClass =
   'w-full rounded-xl border-0 bg-app px-2.5 py-2 text-sm text-ink placeholder:text-dim focus:outline-none focus:ring-2 focus:ring-accent';
@@ -18,13 +17,23 @@ export function AccessoriesBlock({ dayIndex, week }: { dayIndex: number; week: n
   } = useTraining();
   const slots = state.accessoryPlan[dayIndex] || [];
 
+  const summary =
+    slots.length === 0
+      ? 'Lägg till rodd, axlar, bålarbete...'
+      : slots.map((slot) => slot.name || 'Namnlös').join(' · ');
+
   return (
-    <div className="mb-4">
-      <SectionHeader title="Tillbehör" onAction={() => addAccessorySlot(dayIndex)} />
-      <Card className="p-4">
+    <CollapsibleSection
+      title="4 · Tillägg efter SBS"
+      summary={summary}
+      onAction={() => addAccessorySlot(dayIndex)}
+      defaultOpen={slots.length === 0}
+    >
+      <>
         {slots.map((slot, idx) => {
           const thisWeekLog = state.accessoryLogs[`acc_${slot.id}_w${week}`];
           const fallback = thisWeekLog || previousAccessoryLog(slot.id, week) || {};
+          const planned = slot.setsReps || 't.ex. 3x10';
           return (
             <div className="mb-2 grid grid-cols-[2fr_1.1fr_1fr_auto] gap-2 last:mb-0" key={slot.id}>
               <input
@@ -36,7 +45,7 @@ export function AccessoriesBlock({ dayIndex, week }: { dayIndex: number; week: n
               <input
                 key={`sr_${slot.id}_w${week}`}
                 className={inputClass}
-                placeholder="t.ex. 3x10"
+                placeholder={planned}
                 defaultValue={fallback.setsReps || ''}
                 onBlur={(e) => updateAccessoryLog(slot.id, week, slot.name, { setsReps: e.target.value })}
               />
@@ -73,7 +82,7 @@ export function AccessoriesBlock({ dayIndex, week }: { dayIndex: number; week: n
             </Button>
           )}
         </div>
-      </Card>
-    </div>
+      </>
+    </CollapsibleSection>
   );
 }

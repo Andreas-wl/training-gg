@@ -1,5 +1,6 @@
 {
   "name": "Styrkelogg",
+  "version": "0.2.0",
   "short_name": "Styrkelogg",
   "description": "Enkel autoreglerad styrketräningslogg baserad på SBS-mönstret",
   "start_url": "./index.html",

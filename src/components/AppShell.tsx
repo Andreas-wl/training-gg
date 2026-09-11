@@ -30,6 +30,13 @@ export function AppShell() {
     if (!hasRequiredMaxes) setSettingsOpen(true);
   }, [hasRequiredMaxes]);
 
+  // Vyerna byts genom att byta ut innehållet i <main>, inte via routing - då
+  // ligger scrollpositionen kvar från förra vyn, vilket läser som att appen
+  // hakar upp sig (man landar mitt i en lista). Nolla den vid varje byte.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [view, openLift]);
+
   const showExercise = view === 'today' && openLift != null && hasRequiredMaxes;
 
   return (

@@ -18,6 +18,7 @@ export function LogSetSheet({
   setNumber,
   targetWeight,
   targetReps,
+  bodyweight = false,
   onClose,
 }: {
   liftKey: LiftKey;
@@ -25,6 +26,8 @@ export function LogSetSheet({
   setNumber: number;
   targetWeight: number;
   targetReps: number;
+  // Kroppsviktslyft: ingen vikt att justera, bara reps.
+  bodyweight?: boolean;
   onClose: () => void;
 }) {
   const { addSet, state } = useTraining();
@@ -40,17 +43,19 @@ export function LogSetSheet({
 
   return (
     <Sheet title={`Logga set ${setNumber}`} onClose={onClose}>
-      <div className="mb-3">
-        <label className="mb-1 block text-xs text-dim">Vikt ({state.settings.unit})</label>
-        <input
-          type="number"
-          step={0.5}
-          className={inputClass}
-          value={weightInput}
-          onChange={(e) => setWeightInput(e.target.value)}
-          autoFocus
-        />
-      </div>
+      {!bodyweight && (
+        <div className="mb-3">
+          <label className="mb-1 block text-xs text-dim">Vikt ({state.settings.unit})</label>
+          <input
+            type="number"
+            step={0.5}
+            className={inputClass}
+            value={weightInput}
+            onChange={(e) => setWeightInput(e.target.value)}
+            autoFocus
+          />
+        </div>
+      )}
       <div className="mb-3">
         <label className="mb-1 block text-xs text-dim">Reps</label>
         <input
@@ -63,8 +68,8 @@ export function LogSetSheet({
 
       {deviates && (
         <div className="mb-3 rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">
-          ⚠ Avviker från mål ({targetWeight} {state.settings.unit} × {targetReps})
-          <div className="mt-0.5 text-xs opacity-80">→ sparas som justerat set</div>
+          ⚠ Avviker från mål ({bodyweight ? 'kroppsvikt' : `${targetWeight} ${state.settings.unit}`} ×{' '}
+          {targetReps})<div className="mt-0.5 text-xs opacity-80">→ sparas som justerat set</div>
         </div>
       )}
 
