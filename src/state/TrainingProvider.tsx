@@ -12,15 +12,18 @@ import type {
 } from '../domain/types';
 import { intensityFor, isHardSet, roundTo, targetRepsFor, targetWeightFor } from '../domain/programEngine';
 import { validateProgram } from '../domain/validateProgram';
+import basVolymFunktionJson from '../data/programs/bas-volym-funktion.json';
 import sbsDefaultJson from '../data/programs/sbs-default.json';
 import sbsMinVariantJson from '../data/programs/sbs-min-variant.json';
 
 // Standardprogrammet är alltid tillgängligt. Programbibliotek (etapp 5,
 // PLAN.md #10) lägger till möjligheten att importera/välja fler ovanpå det.
-// "Min variant" ligger först och är därmed aktiv som standard (se
-// TrainingRepository.getActiveProgramId) - standard-SBS lämnas orört så det
-// alltid går att jämföra mot originalet.
+// "Bas + Volym + Funktion" ligger först och är därmed aktiv som standard (se
+// TrainingRepository.getActiveProgramId) - SBS-programmen lämnas orörda så
+// det alltid går att jämföra mot originalet. Ett redan sparat aktivt
+// program-id i storage vinner över ordningen här.
 const BUILT_IN_PROGRAMS: Program[] = [
+  basVolymFunktionJson as unknown as Program,
   sbsMinVariantJson as unknown as Program,
   sbsDefaultJson as unknown as Program,
 ];
