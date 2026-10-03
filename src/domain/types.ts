@@ -18,6 +18,22 @@ export interface LiftDefinition {
   // Endast för 'fixed': %-tabellen är meningslös för ett lyft som inte körs
   // på procent av ett max, så repsmålet anges explicit.
   targetReps?: number;
+  // 'manual' (t.ex. Min-Max): inget max och ingen %-tabell - vikten väljer
+  // man själv och appen föreslår senast loggade vikt. Styrs i stället av
+  // repintervall + RIR per set och vecka (weekly, indexerad på effektiv vecka).
+  loadMode?: 'manual';
+  repRange?: string;
+  warmupSets?: string;
+  rest?: string;
+  substitutions?: string[];
+  notes?: string;
+  weekly?: WeeklyLiftPlan[];
+}
+
+export interface WeeklyLiftPlan {
+  // RIR-mål per set; null = inget mål angivet för just det setet.
+  rir: (number | null)[];
+  technique?: string;
 }
 
 export interface PercentRow {
@@ -68,6 +84,11 @@ export interface Program {
   defaultSettings: Settings;
   accessorySuggestions?: string[];
   dayPrep?: Record<number, DayPrepTemplate[]>;
+  // Valfria visningstexter per dag/vecka. Saknas de används "Dag N" resp.
+  // SBS-etiketten från blockWaveLabel.
+  dayNames?: string[];
+  weekLabels?: string[];
+  weekNotes?: string[];
 }
 
 // Set-nivå-loggning (etapp 4, PLAN.md #5) - varje set bär sitt eget snapshot

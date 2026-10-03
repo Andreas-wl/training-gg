@@ -5,7 +5,24 @@
  * konstanter, så att olika program (t.ex. uppladdade av användaren) kan
  * driva samma beräkningar.
  */
-import type { LiftDefinition, PercentRow, Program } from './types';
+import type { LiftDefinition, PercentRow, Program, TrainingState, WeeklyLiftPlan } from './types';
+
+export function availableFrequencies(program: Program): number[] {
+  return Object.keys(program.dayTemplates)
+    .map(Number)
+    .filter((n) => !Number.isNaN(n))
+    .sort((a, b) => a - b);
+}
+
+// `settings.frequency` är sparat oberoende av program (samma TrainingState
+// delas mellan alla program). Ett program man byter till kan sakna
+// dayTemplates för den frekvens som råkade vara vald tidigare - normalisera
+// till en frekvens som faktiskt finns i det nya programmet, annars kraschar
+// TodayScreen (dayTemplates[freq] blir undefined).
+export function resolveFrequency(program: Program, frequency: number): number {
+  if (program.dayTemplates[frequency]) return frequency;
+  return availableFrequencies(program)[0] ?? frequency;
+}
 
 export function cycleLength(program: Program): number {
   return program.weekMainIntensity.length;
@@ -26,6 +43,10 @@ export interface BlockWaveLabel {
 // Block/våg-etikett, t.ex. "Block 2, våg 1, vecka 2/3" eller "Deload".
 export function blockWaveLabel(program: Program, absoluteWeek: number): BlockWaveLabel {
   const week = effectiveWeek(program, absoluteWeek);
+  const custom = program.weekLabels?.[week - 1];
+  if (custom) {
+    return { block: 0, deload: /deload/i.test(custom), text: custom };
+  }
   const withinBlock = ((week - 1) % 7) + 1;
   const block = Math.floor((week - 1) / 7) + 1;
   if (withinBlock === 7) {
@@ -96,6 +117,36 @@ export function targetWeightFor(
 ): number | null {
   if (lift.bodyweight) return 0;
   return computeWeight(max, pct, rounding);
+}
+
+export function isManualLoad(lift: LiftDefinition): boolean {
+  return lift.loadMode === 'manual';
+}
+
+export function weeklyPlanFor(program: Program, lift: LiftDefinition, absoluteWeek: number): WeeklyLiftPlan | undefined {
+  return lift.weekly?.[effectiveWeek(program, absoluteWeek) - 1];
+}
+
+// Föreslagen vikt för ett 'manual'-lyft: sista setet från senaste tidigare
+// vecka med loggade set. Bara TIDIGARE veckor, så målet är stabilt under
+// hela passet och addSet räknar fram samma mål som skärmen visar.
+function previousLoggedWeight(logs: TrainingState['logs'], liftKey: string, week: number): number | null {
+  for (let w = week - 1; w >= 1; w -= 1) {
+    const sets = logs[`${liftKey}_w${w}`]?.sets;
+    if (sets?.length) return sets[sets.length - 1].weight;
+  }
+  return null;
+}
+
+// Målvikt på ETT ställe för LiftRow, ExerciseScreen och addSet - räknar de
+// olika flaggas varje set som justerat.
+export function resolveTargetWeight(program: Program, state: TrainingState, liftKey: string, week: number): number | null {
+  const lift = program.lifts[liftKey];
+  if (lift.bodyweight) return 0;
+  if (isManualLoad(lift)) return previousLoggedWeight(state.logs, liftKey, week);
+  const log = state.logs[`${liftKey}_w${week}`];
+  const max = log?.testSingle ? log.testSingle / state.settings.singleAt8Percent : state.maxes[liftKey];
+  return computeWeight(max, intensityFor(program, liftKey, week), state.settings.rounding);
 }
 
 // Ett set räknas som "hårt" om man inte klarade fler reps än vad %-tabellen

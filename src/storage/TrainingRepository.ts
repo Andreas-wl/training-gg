@@ -8,6 +8,7 @@ import type {
   WarmupItem,
   WarmupLog,
 } from '../domain/types';
+import { resolveFrequency } from '../domain/programEngine';
 
 const STORAGE_KEY = 'sbsTrainerData_v1';
 const CUSTOM_PROGRAMS_KEY = 'sbsCustomPrograms_v1';
@@ -40,21 +41,32 @@ function defaultState(program: Program): TrainingState {
 // redigerar eller tar bort ska stanna borta.
 //
 // OBS: warmupPlan/accessoryPlan är nycklade på dagindex, INTE på frekvens,
-// men dayPrep är (som dayTemplates) nycklad på frekvens och finns bara för 4
-// dagar/vecka. Markören innehåller därför frekvensen: kör man 3 dagar/vecka
-// seedas ingenting, och byter man sedan till 4 ändras markören så seedningen
-// får en ny chans. Innehållet följer alltså inte med mellan frekvenser - det
-// är en 4-dagarsmall, inte en generell.
-function seedDayPrep(state: TrainingState, program: Program): TrainingState {
-  const freq = state.settings.frequency;
+// men dayPrep är (som dayTemplates) nycklad på frekvens och finns bara för de
+// frekvenser programmet anger. Markören innehåller därför frekvensen: byter
+// man frekvens ändras markören så seedningen får en ny chans för tomma dagar.
+// Byter man PROGRAM nollställs planerna helt (se nedan).
+//
+// Frekvensen normaliseras först (ett sparat "4" från ett tidigare program
+// finns inte i ett 5-dagarsprogram), annars seedas mallen för fel frekvens.
+function seedDayPrep(loaded: TrainingState, program: Program): TrainingState {
+  const freq = resolveFrequency(program, loaded.settings.frequency);
+  const state = freq === loaded.settings.frequency ? loaded : { ...loaded, settings: { ...loaded.settings, frequency: freq } };
   const marker = `${program.id}:${freq}`;
   if (state.seededPrepFor === marker) return state;
 
-  const template = program.dayPrep?.[freq];
-  if (!template) return { ...state, seededPrepFor: marker };
+  // Seedat för ett ANNAT program (eller aldrig seedat): förra programmets
+  // pass-tillägg hör inte hemma här, så planerna börjar om från det nya
+  // programmets mall och vecka/dag nollställs. Loggarna ligger kvar.
+  const sameProgram = state.seededPrepFor?.split(':')[0] === program.id;
+  const base: TrainingState = sameProgram
+    ? state
+    : { ...state, warmupPlan: {}, accessoryPlan: {}, currentWeek: 1, currentDayIndex: 0 };
 
-  const warmupPlan = { ...state.warmupPlan };
-  const accessoryPlan = { ...state.accessoryPlan };
+  const template = program.dayPrep?.[freq];
+  if (!template) return { ...base, seededPrepFor: marker };
+
+  const warmupPlan = { ...base.warmupPlan };
+  const accessoryPlan = { ...base.accessoryPlan };
 
   template.forEach((day, dayIndex) => {
     if (!warmupPlan[dayIndex]?.length) {
@@ -79,7 +91,7 @@ function seedDayPrep(state: TrainingState, program: Program): TrainingState {
     }
   });
 
-  return { ...state, warmupPlan, accessoryPlan, seededPrepFor: marker };
+  return { ...base, warmupPlan, accessoryPlan, seededPrepFor: marker };
 }
 
 export function makeId(): string {

@@ -5,8 +5,10 @@ import {
   cycleLength,
   effectiveWeek,
   intensityFor,
+  isManualLoad,
+  resolveTargetWeight,
   targetRepsFor,
-  targetWeightFor,
+  weeklyPlanFor,
 } from '../domain/programEngine';
 import type { LiftKey } from '../domain/types';
 import { AccessoriesBlock } from './AccessoriesBlock';
@@ -17,6 +19,12 @@ import { SectionHeader } from '../ui/SectionHeader';
 // Dagöversikt (PLAN.md #8.2) - en lätt lista, inte fulla lyftkort. Klick på
 // en rad öppnar övnings-detaljvyn (ExerciseScreen) via onOpenLift, som styrs
 // från AppShell.
+// "RIR 1/0" - mål per set, hoppar över set utan angivet mål.
+function rirText(rir: (number | null)[] | undefined): string {
+  const values = (rir ?? []).filter((r): r is number => r != null);
+  return values.length ? `RIR ${values.join('/')}` : '';
+}
+
 function LiftRow({ liftKey, week, onOpen }: { liftKey: LiftKey; week: number; onOpen: () => void }) {
   const { state, program } = useTraining();
   const lift = program.lifts[liftKey];
@@ -24,17 +32,23 @@ function LiftRow({ liftKey, week, onOpen }: { liftKey: LiftKey; week: number; on
 
   const pct = intensityFor(program, liftKey, week);
   const reps = targetRepsFor(lift, program, pct);
-  const max = state.maxes[liftKey];
-  const effectiveMax = log?.testSingle ? log.testSingle / state.settings.singleAt8Percent : max;
-  const weight = targetWeightFor(lift, effectiveMax, pct, state.settings.rounding);
+  const weight = resolveTargetWeight(program, state, liftKey, week);
+  const manual = isManualLoad(lift);
+  const plan = weeklyPlanFor(program, lift, week);
 
   const setCount = log?.sets?.length ?? 0;
-  const badge = lift.isMain ? 'Huvudlyft' : `Variant · ${program.lifts[lift.group]?.name ?? ''}`;
+  const badge = manual
+    ? [`${lift.targetSets} set × ${lift.repRange}`, rirText(plan?.rir), plan?.technique].filter(Boolean).join(' · ')
+    : lift.isMain
+      ? 'Huvudlyft'
+      : `Variant · ${program.lifts[lift.group]?.name ?? ''}`;
   const target = lift.bodyweight
     ? `Kroppsvikt × ${reps}`
     : weight != null
-      ? `${weight} ${state.settings.unit} × ${reps}`
-      : 'Sätt max';
+      ? `${weight} ${state.settings.unit}${manual ? '' : ` × ${reps}`}`
+      : manual
+        ? 'Välj vikt'
+        : 'Sätt max';
   const status = setCount > 0 ? `${setCount} set loggade` : target;
 
   return (
@@ -90,6 +104,12 @@ export function TodayScreen({ onOpenLift }: { onOpenLift: (liftKey: LiftKey) => 
         </button>
       </div>
 
+      {program.weekNotes?.[effWeek - 1] && (
+        <div className="mb-4 rounded-2xl bg-white px-4 py-3 text-xs text-dim shadow-sm">
+          {program.weekNotes[effWeek - 1]}
+        </div>
+      )}
+
       <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
         {days.map((_, idx) => (
           <button
@@ -99,12 +119,12 @@ export function TodayScreen({ onOpenLift }: { onOpenLift: (liftKey: LiftKey) => 
             }`}
             onClick={() => setCurrentDayIndex(idx)}
           >
-            Dag {idx + 1}
+            {program.dayNames?.[idx] ?? `Dag ${idx + 1}`}
           </button>
         ))}
       </div>
 
-      {/* Passordningen är fast: mobility -> explosivt -> SBS -> tillägg. */}
+      {/* Passordningen är fast: mobility -> explosivt -> styrka -> tillägg. */}
       <WarmupBlock
         dayIndex={dayIndex}
         week={state.currentWeek}
@@ -120,8 +140,11 @@ export function TodayScreen({ onOpenLift }: { onOpenLift: (liftKey: LiftKey) => 
         hint="Hopp/kast före skivstången, medan du är fräsch."
       />
 
-      <SectionHeader title="3 · SBS" />
+      <SectionHeader title="3 · Styrka" />
       <div className="mb-4">
+        {days[dayIndex].length === 0 && (
+          <Card className="mb-3 p-4 text-sm text-dim">Ingen styrketräning idag.</Card>
+        )}
         {days[dayIndex].map((liftKey) => (
           <LiftRow
             key={liftKey}

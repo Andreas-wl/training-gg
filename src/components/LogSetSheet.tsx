@@ -19,19 +19,23 @@ export function LogSetSheet({
   targetWeight,
   targetReps,
   bodyweight = false,
+  manual = false,
   onClose,
 }: {
   liftKey: LiftKey;
   week: number;
   setNumber: number;
-  targetWeight: number;
+  // null = inget förslag än (manuellt lyft första veckan) - fältet börjar tomt.
+  targetWeight: number | null;
   targetReps: number;
   // Kroppsviktslyft: ingen vikt att justera, bara reps.
   bodyweight?: boolean;
+  // Manuell vikt: reps varierar till failure, bara viktbyte är en avvikelse.
+  manual?: boolean;
   onClose: () => void;
 }) {
   const { addSet, state } = useTraining();
-  const [weightInput, setWeightInput] = useState(String(targetWeight));
+  const [weightInput, setWeightInput] = useState(targetWeight == null ? '' : String(targetWeight));
   const [repsInput, setRepsInput] = useState(String(targetReps));
 
   const weight = weightInput.trim() === '' ? NaN : Number(weightInput);
@@ -39,7 +43,10 @@ export function LogSetSheet({
   const repsInvalid = reps != null && Number.isNaN(reps);
   const canSave = !Number.isNaN(weight) && !repsInvalid;
 
-  const deviates = !Number.isNaN(weight) && (weight !== targetWeight || reps !== targetReps);
+  const deviates =
+    !Number.isNaN(weight) &&
+    targetWeight != null &&
+    (manual ? weight !== targetWeight : weight !== targetWeight || reps !== targetReps);
 
   return (
     <Sheet title={`Logga set ${setNumber}`} onClose={onClose}>

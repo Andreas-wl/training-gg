@@ -10,39 +10,25 @@ import type {
   TrainingState,
   WarmupLog,
 } from '../domain/types';
-import { intensityFor, isHardSet, roundTo, targetRepsFor, targetWeightFor } from '../domain/programEngine';
+import {
+  intensityFor,
+  isHardSet,
+  isManualLoad,
+  resolveFrequency,
+  resolveTargetWeight,
+  roundTo,
+  targetRepsFor,
+} from '../domain/programEngine';
 import { validateProgram } from '../domain/validateProgram';
-import basVolymFunktionJson from '../data/programs/bas-volym-funktion.json';
-import sbsDefaultJson from '../data/programs/sbs-default.json';
-import sbsMinVariantJson from '../data/programs/sbs-min-variant.json';
+import minMaxHybridJson from '../data/programs/min-max-hybrid.json';
 
 // Standardprogrammet är alltid tillgängligt. Programbibliotek (etapp 5,
 // PLAN.md #10) lägger till möjligheten att importera/välja fler ovanpå det.
-// "Bas + Volym + Funktion" ligger först och är därmed aktiv som standard (se
-// TrainingRepository.getActiveProgramId) - SBS-programmen lämnas orörda så
-// det alltid går att jämföra mot originalet. Ett redan sparat aktivt
-// program-id i storage vinner över ordningen här.
-const BUILT_IN_PROGRAMS: Program[] = [
-  basVolymFunktionJson as unknown as Program,
-  sbsMinVariantJson as unknown as Program,
-  sbsDefaultJson as unknown as Program,
-];
+// Ett sparat aktivt program-id som inte längre finns faller tillbaka på
+// första programmet här.
+const BUILT_IN_PROGRAMS: Program[] = [minMaxHybridJson as unknown as Program];
 
 const repository = new TrainingRepository(new LocalStorageAdapter(), BUILT_IN_PROGRAMS);
-
-// `settings.frequency` är sparat oberoende av program (samma TrainingState
-// delas mellan alla program). Ett program man byter till kan sakna
-// dayTemplates för den frekvens som råkade vara vald tidigare - normalisera
-// till en frekvens som faktiskt finns i det nya programmet, annars kraschar
-// TodayScreen (dayTemplates[freq] blir undefined).
-function resolveFrequency(program: Program, frequency: number): number {
-  if (program.dayTemplates[frequency]) return frequency;
-  const available = Object.keys(program.dayTemplates)
-    .map(Number)
-    .filter((n) => !Number.isNaN(n))
-    .sort((a, b) => a - b);
-  return available[0] ?? frequency;
-}
 
 function downloadProgramJson(program: Program): void {
   const blob = new Blob([JSON.stringify(program, null, 2)], { type: 'application/json' });
@@ -172,7 +158,9 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
   const value = useMemo<TrainingContextValue | null>(() => {
     if (!state || !program) return null;
 
-    const mainKeys: LiftKey[] = Object.keys(program.lifts).filter((k) => program.lifts[k].isMain);
+    const mainKeys: LiftKey[] = Object.keys(program.lifts).filter(
+      (k) => program.lifts[k].isMain && !isManualLoad(program.lifts[k]),
+    );
     const hasRequiredMaxes = mainKeys.every((k) => state.maxes[k]);
 
     const updateLog: TrainingContextValue['updateLog'] = (liftKey, week, patch) => {
@@ -197,15 +185,16 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
         const sets = existing?.sets ?? [];
 
         const lift = program.lifts[liftKey];
-        const max = prev.maxes[liftKey];
         const pct = intensityFor(program, liftKey, week);
         const targetReps = targetRepsFor(lift, program, pct);
-        const effectiveMax = existing?.testSingle
-          ? existing.testSingle / prev.settings.singleAt8Percent
-          : max;
-        const targetWeight = targetWeightFor(lift, effectiveMax, pct, prev.settings.rounding) ?? 0;
+        const resolved = resolveTargetWeight(program, prev, liftKey, week);
 
-        const adjusted = weight !== targetWeight || reps !== targetReps;
+        // Manuell vikt: reps varierar naturligt inom intervallet till failure,
+        // så bara ett viktbyte mot förslaget räknas som justering. Saknas
+        // förslag (första veckan) är den valda vikten själva målet.
+        const manual = isManualLoad(lift);
+        const targetWeight = manual ? (resolved ?? weight) : (resolved ?? 0);
+        const adjusted = manual ? weight !== targetWeight : weight !== targetWeight || reps !== targetReps;
         const newSet: SetEntry = {
           index: sets.length,
           targetWeight,

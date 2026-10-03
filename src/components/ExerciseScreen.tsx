@@ -1,6 +1,14 @@
 import { useRef, useState } from 'react';
 import { useTraining } from '../state/TrainingProvider';
-import { intensityFor, percentRow, roundTo, targetRepsFor, targetWeightFor } from '../domain/programEngine';
+import {
+  intensityFor,
+  isManualLoad,
+  percentRow,
+  resolveTargetWeight,
+  roundTo,
+  targetRepsFor,
+  weeklyPlanFor,
+} from '../domain/programEngine';
 import type { LiftKey } from '../domain/types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -31,13 +39,20 @@ export function ExerciseScreen({
   const logKey = `${liftKey}_w${week}`;
   const log = state.logs[logKey];
   const sets = log?.sets ?? [];
-  const max = state.maxes[liftKey];
 
   const pct = intensityFor(program, liftKey, week);
-  const { rir } = percentRow(program, pct);
   const targetReps = targetRepsFor(lift, program, pct);
-  const effectiveMax = log?.testSingle ? log.testSingle / state.settings.singleAt8Percent : max;
-  const targetWeight = targetWeightFor(lift, effectiveMax, pct, state.settings.rounding);
+  const targetWeight = resolveTargetWeight(program, state, liftKey, week);
+
+  // Manuell vikt (Min-Max): RIR-målet är per set och vecka, inte från
+  // %-tabellen, och vikten föreslås från förra veckan.
+  const manual = isManualLoad(lift);
+  const plan = weeklyPlanFor(program, lift, week);
+  const setRir = (i: number) => plan?.rir[i] ?? null;
+  const rirLabel = manual
+    ? plan?.rir.map((r) => r ?? '–').join(' / ') || '–'
+    : String(percentRow(program, pct).rir);
+  const repsLabel = manual && lift.repRange ? lift.repRange : String(targetReps);
 
   const suggestion = autoregSuggestion(liftKey, week);
 
@@ -59,7 +74,9 @@ export function ExerciseScreen({
     ? 'Kroppsvikt'
     : targetWeight != null
       ? `${targetWeight} ${unit}`
-      : 'Sätt max';
+      : manual
+        ? 'Välj vikt'
+        : 'Sätt max';
   const setWeightLabel = (weight: number) => (lift.bodyweight ? 'Kroppsvikt' : `${weight} ${unit}`);
 
   return (
@@ -74,7 +91,14 @@ export function ExerciseScreen({
         <div>
           <h2 className="text-[17px] font-semibold text-ink">{lift.name}</h2>
           <div className="text-xs text-dim">
-            {lift.isMain ? 'Huvudlyft' : `Variant · ${program.lifts[lift.group]?.name ?? ''}`} · vecka {week}
+            {manual
+              ? [lift.warmupSets && `${lift.warmupSets} uppvärmningsset`, lift.rest && `vila ${lift.rest}`]
+                  .filter(Boolean)
+                  .join(' · ')
+              : lift.isMain
+                ? 'Huvudlyft'
+                : `Variant · ${program.lifts[lift.group]?.name ?? ''}`}{' '}
+            · vecka {week}
           </div>
         </div>
       </div>
@@ -89,25 +113,36 @@ export function ExerciseScreen({
           </div>
           <div className="text-center">
             <span className="block text-[11px] text-dim">Reps</span>
-            <span className="mt-0.5 block text-base font-semibold text-ink">{targetReps}</span>
+            <span className="mt-0.5 block text-base font-semibold text-ink">{repsLabel}</span>
           </div>
-          {/* RIR kommer från %-tabellen och betyder inget för ett lyft som
-              inte körs på procent av ett max. */}
-          {!lift.bodyweight && (
+          {/* RIR kommer från %-tabellen (eller veckoplanen för manuella lyft)
+              och betyder inget för ett kroppsviktslyft på procent. */}
+          {(manual || !lift.bodyweight) && (
             <div className="text-center">
               <span className="block text-[11px] text-dim">RIR</span>
-              <span className="mt-0.5 block text-base font-semibold text-ink">{rir}</span>
+              <span className="mt-0.5 block text-base font-semibold text-ink">{rirLabel}</span>
             </div>
           )}
         </div>
         <div className="text-xs text-dim">
-          {lift.setScheme === 'fixed' && targetSets
-            ? `Mål: ${targetSets} set × ${targetReps} reps`
-            : `Mål: ${state.thresholds.lower}-${state.thresholds.upper} hårda set/vecka`}
+          {manual
+            ? `Mål: ${targetSets} set × ${repsLabel}, RIR ${rirLabel}`
+            : lift.setScheme === 'fixed' && targetSets
+              ? `Mål: ${targetSets} set × ${targetReps} reps`
+              : `Mål: ${state.thresholds.lower}-${state.thresholds.upper} hårda set/vecka`}
         </div>
+        {plan?.technique && (
+          <div className="mt-2 rounded-xl bg-accent/10 px-3 py-2 text-sm font-medium text-accent">
+            Sista setet: {plan.technique}
+          </div>
+        )}
+        {lift.notes && <p className="mt-2 text-sm text-ink">{lift.notes}</p>}
+        {lift.substitutions && lift.substitutions.length > 0 && (
+          <div className="mt-2 text-xs text-dim">Alternativ: {lift.substitutions.join(' · ')}</div>
+        )}
       </Card>
 
-      {!lift.bodyweight && (
+      {!lift.bodyweight && !manual && (
         <Card className="mb-4 p-4">
           <label className="mb-1 block text-xs text-dim">Testade du en singel @RPE8 idag? (valfritt)</label>
           <div className="flex flex-wrap gap-2">
@@ -143,7 +178,7 @@ export function ExerciseScreen({
       <Card className="mb-4 p-4">
         <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-dim">
           Set
-          {lift.setScheme === 'fixed' && targetSets ? ` (mål: ${targetSets} set × ${targetReps} reps)` : ''}
+          {lift.setScheme === 'fixed' && targetSets ? ` (mål: ${targetSets} set × ${repsLabel})` : ''}
         </h3>
 
         {sets.map((set, i) => (
@@ -153,6 +188,7 @@ export function ExerciseScreen({
           >
             <span className="text-[15px] text-ink">
               Set {i + 1}: {setWeightLabel(set.weight)} × {set.reps ?? '–'} reps
+              {manual && setRir(i) != null && <span className="ml-1 text-xs text-dim">(mål RIR {setRir(i)})</span>}
               {set.adjusted && <span className="ml-2 text-xs text-danger">⚠ justerat</span>}
             </span>
             <button
@@ -172,7 +208,10 @@ export function ExerciseScreen({
             faktiska värden (se PLAN.md #5). */}
         <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-dashed border-black/10 bg-app px-3 py-2">
           <span className="text-[15px] text-ink">
-            Set {sets.length + 1}: {weightLabel} × {targetReps} reps
+            Set {sets.length + 1}: {weightLabel} × {repsLabel} reps
+            {manual && setRir(sets.length) != null && (
+              <span className="ml-1 text-xs text-dim">· RIR {setRir(sets.length)}</span>
+            )}
           </span>
           <div className="flex flex-shrink-0 items-center gap-2">
             <button
@@ -181,10 +220,14 @@ export function ExerciseScreen({
             >
               Justera
             </button>
+            {/* Manuellt lyft utan förslag: "Klart" öppnar sheeten så man
+                fyller i vikten, i stället för att vara utgråad. */}
             <button
               className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white shadow-sm disabled:opacity-40"
-              disabled={targetWeight == null}
-              onClick={() => targetWeight != null && addSet(liftKey, week, targetWeight, targetReps)}
+              disabled={targetWeight == null && !manual}
+              onClick={() =>
+                targetWeight != null ? addSet(liftKey, week, targetWeight, targetReps) : setSheetOpen(true)
+              }
             >
               Klart
             </button>
@@ -257,9 +300,10 @@ export function ExerciseScreen({
           liftKey={liftKey}
           week={week}
           setNumber={sets.length + 1}
-          targetWeight={targetWeight ?? 0}
+          targetWeight={targetWeight}
           targetReps={targetReps}
           bodyweight={lift.bodyweight}
+          manual={manual}
           onClose={() => setSheetOpen(false)}
         />
       )}

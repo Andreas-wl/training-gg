@@ -24,7 +24,7 @@ export function AccessoriesBlock({ dayIndex, week }: { dayIndex: number; week: n
 
   return (
     <CollapsibleSection
-      title="4 · Tillägg efter SBS"
+      title="4 · Funktion / tillägg"
       summary={summary}
       onAction={() => addAccessorySlot(dayIndex)}
       defaultOpen={slots.length === 0}

@@ -1,0 +1,2683 @@
+{
+  "id": "min-max-4x-hybrid",
+  "name": "Min-Max 4x + Hybrid",
+  "description": "Jeff Nippards Min-Max (4 pass/vecka, 12 veckor) med hybridtillägg. Passordning: mobilitetsflow -> explosivt -> styrkepasset -> funktion/kondition. Nästan varje set ska tas till failure eller 1 rep från (RIR står per set och vecka). Vikten väljer du själv - appen föreslår förra veckans vikt. Vecka 1 = intro, vecka 7 = deload, från vecka 8 används intensitetstekniker på sista setet. Starta varje pass med ~5 min lätt cardio. Tilläggen får aldrig försämra arbetsseten: går passet över 70 min, ta först bort funktions-finishern, sedan minska HIIT. Onsdag = spinning 45-60 min (mest zon 2), fredag/söndag vila (promenad, valfri lätt mobilitet).",
+  "lifts": {
+    "mm_lyingLegCurl": {
+      "name": "Lying Leg Curl",
+      "group": "mm_lyingLegCurl",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "1-2",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Seated Leg Curl",
+        "Nordic Ham Curl"
+      ],
+      "notes": "Set the machine so that you get the biggest stretch possible at the bottom. Prevent your butt from popping up as you curl.",
+      "weekly": [
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        }
+      ]
+    },
+    "mm_squat": {
+      "name": "Squat (Your Choice)",
+      "group": "mm_squat",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "2-4",
+      "rest": "3-5 min",
+      "substitutions": [],
+      "notes": "This can be a Barbell Back Squat, Barbell Front Squat, Pendulum Squat, Hack Squat, Belt Squat, or Smith Machine Squat.",
+      "weekly": [
+        {
+          "rir": [
+            3,
+            2
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            3,
+            2
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        }
+      ]
+    },
+    "mm_barbellInclinePress": {
+      "name": "Barbell Incline Press",
+      "group": "mm_barbellInclinePress",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "2-4",
+      "rest": "3-5 min",
+      "substitutions": [
+        "Smith Machine Incline Press",
+        "DB Incline Press"
+      ],
+      "notes": "A 30° or 45° bench will work here. Pause for 1 second at the bottom of each rep while maintaining tension on the pecs.",
+      "weekly": [
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        }
+      ]
+    },
+    "mm_inclineDbYRaise": {
+      "name": "Incline DB Y-Raise",
+      "group": "mm_inclineDbYRaise",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 1,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Cable Y-Raise",
+        "Machine Lateral Raise"
+      ],
+      "notes": "Use a 30° incline bench (back against the bench) and lift the weight up and out in a Y shape.",
+      "weekly": [
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        }
+      ]
+    },
+    "mm_pullUp": {
+      "name": "Pull-Up (Wide Grip)",
+      "group": "mm_pullUp",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "1-2",
+      "rest": "2-3 min",
+      "substitutions": [
+        "Lat Pulldown (Wide Grip)",
+        "1-Arm Cable Pulldown"
+      ],
+      "notes": "Control the negative and feel your lats pulling apart. Full ROM!",
+      "weekly": [
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        }
+      ]
+    },
+    "mm_standingCalfRaise": {
+      "name": "Standing Calf Raise",
+      "group": "mm_standingCalfRaise",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 1,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Leg Press Calf Press",
+        "Donkey Calf Raise"
+      ],
+      "notes": "1-2 second pause at the bottom of each rep. Instead of just going up onto your toes, think about rolling your ankle back and forth on the balls of your feet.",
+      "weekly": [
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        }
+      ]
+    },
+    "mm_closeGripLatPulldown": {
+      "name": "Close-Grip Lat Pulldown",
+      "group": "mm_closeGripLatPulldown",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "2-3",
+      "rest": "2-3 min",
+      "substitutions": [
+        "Close-Grip Pull-Up",
+        "1-Arm Cable Pulldown"
+      ],
+      "notes": "Lean back by ~15° and drive your elbows down as you squeeze your shoulder blades together. This should feel like a mix of lats and mid-traps.",
+      "weekly": [
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        }
+      ]
+    },
+    "mm_chestSupportedTBarRow": {
+      "name": "Chest-Supported T-Bar Row",
+      "group": "mm_chestSupportedTBarRow",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "2-3",
+      "rest": "2-3 min",
+      "substitutions": [
+        "Chest-Supported Machine Row",
+        "Chest-Supported DB Row"
+      ],
+      "notes": "Flare elbows out at roughly 45° and squeeze your shoulder blades together hard at the top of each rep.",
+      "weekly": [
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        }
+      ]
+    },
+    "mm_machineShrug": {
+      "name": "Machine Shrug",
+      "group": "mm_machineShrug",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 1,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "1-2",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Barbell Shrug",
+        "Cable Shrug-In"
+      ],
+      "notes": "Think about shrugging \"up to your ears\". Use straps, if possible.",
+      "weekly": [
+        {
+          "rir": [
+            1
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            1
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        }
+      ]
+    },
+    "mm_machineChestPress": {
+      "name": "Machine Chest Press",
+      "group": "mm_machineChestPress",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "2-4",
+      "rest": "3-5 min",
+      "substitutions": [
+        "Smith Machine Bench Press",
+        "DB Bench Press"
+      ],
+      "notes": "1 second pause at the bottom of each rep while maintaining tension on the pecs.",
+      "weekly": [
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Statiskt håll med vikt (30 s)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Statiskt håll med vikt (30 s)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Statiskt håll med vikt (30 s)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Statiskt håll med vikt (30 s)"
+        },
+        {
+          "rir": [
+            1,
+            0
+          ],
+          "technique": "Statiskt håll med vikt (30 s)"
+        }
+      ]
+    },
+    "mm_highCableLateralRaise": {
+      "name": "High-Cable Lateral Raise",
+      "group": "mm_highCableLateralRaise",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "DB Lateral Raise",
+        "Machine Lateral Raise"
+      ],
+      "notes": "Set the cable at roughly hip height. Let your hand go slightly past your midline at the bottom of each rep to get a deep stretch on the side delt.",
+      "weekly": [
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "mm_1ArmReversePecDeck": {
+      "name": "1-Arm Reverse Pec Deck",
+      "group": "mm_1ArmReversePecDeck",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 1,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Lying Reverse DB Flye",
+        "Reverse Cable Crossover"
+      ],
+      "notes": "Sweep the weight out to create the largest semi-circle possible with your arm.",
+      "weekly": [
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        }
+      ]
+    },
+    "mm_cableCrunch": {
+      "name": "Cable Crunch",
+      "group": "mm_cableCrunch",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Weighted Crunch",
+        "Machine Crunch"
+      ],
+      "notes": "Round your lower back as you crunch. Maintain a mind-muscle connection with your 6-pack.",
+      "weekly": [
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "mm_legExtension": {
+      "name": "Leg Extension",
+      "group": "mm_legExtension",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "1-2",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Reverse Nordic",
+        "Sissy Squat"
+      ],
+      "notes": "Set the seat back as far as it will go while still feeling comfortable. Grab the handles as hard as you can to pull your butt down into the seat (using straps can help here).",
+      "weekly": [
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        }
+      ]
+    },
+    "mm_barbellRdl": {
+      "name": "Barbell RDL",
+      "group": "mm_barbellRdl",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "2-3",
+      "rest": "2-3 min",
+      "substitutions": [
+        "DB RDL",
+        "Seated Cable Deadlift"
+      ],
+      "notes": "Stick your glutes straight back as you lower the bar straight down, centered over the middle of your foot. Get a nice deep stretch at the bottom, but keep your spine neutral (don't round forward).",
+      "weekly": [
+        {
+          "rir": [
+            3,
+            2
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            3,
+            2
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    "mm_machineHipThrust": {
+      "name": "Machine Hip Thrust",
+      "group": "mm_machineHipThrust",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "2-4",
+      "rest": "2-3 min",
+      "substitutions": [
+        "Barbell Hip Thrust",
+        "45° Hyperextension"
+      ],
+      "notes": "Squeeze your glutes hard at the top and control the weight on the way down.",
+      "weekly": [
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            2,
+            1
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        }
+      ]
+    },
+    "mm_legPress": {
+      "name": "Leg Press",
+      "group": "mm_legPress",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 1,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "2-4",
+      "rest": "2-3 min",
+      "substitutions": [
+        "Smith Machine Squat",
+        "Barbell Squat"
+      ],
+      "notes": "Feet lower on the platform for more quad focus. Get as deep as you can without excessive back rounding.",
+      "weekly": [
+        {
+          "rir": [
+            1
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            1
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        }
+      ]
+    },
+    "mm_standingCalfRaiseLow": {
+      "name": "Standing Calf Raise",
+      "group": "mm_standingCalfRaiseLow",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Leg Press Calf Press",
+        "Donkey Calf Raise"
+      ],
+      "notes": "1-2 second pause at the bottom of each rep. Instead of just going up onto your toes, think about rolling your ankle back and forth on the balls of your feet.",
+      "weekly": [
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Lengthened partials (förläng sista setet)"
+        }
+      ]
+    },
+    "mm_bayesianCableCurl": {
+      "name": "Bayesian Cable Curl",
+      "group": "mm_bayesianCableCurl",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Incline DB Curl",
+        "Standing DB Curl"
+      ],
+      "notes": "As you curl, optionally lean forward to prevent the cable from hitting your wrist at the top. Control the negative and feel a deep stretch at the bottom of each rep.",
+      "weekly": [
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "mm_overheadCableTricepsExtension": {
+      "name": "Overhead Cable Triceps Extension",
+      "group": "mm_overheadCableTricepsExtension",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Overhead DB Triceps Extension",
+        "Skull Crusher"
+      ],
+      "notes": "Feel a deep stretch on the triceps throughout the entire negative.",
+      "weekly": [
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "mm_modifiedZottmanCurl": {
+      "name": "Modified Zottman Curl",
+      "group": "mm_modifiedZottmanCurl",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 1,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "DB Hammer Curl",
+        "Preacher Hammer Curl"
+      ],
+      "notes": "Hammer curl on the way up and supinated curl (palms up) on the way down.",
+      "weekly": [
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        }
+      ]
+    },
+    "mm_cableTricepsKickback": {
+      "name": "Cable Triceps Kickback",
+      "group": "mm_cableTricepsKickback",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Seated Dip Machine",
+        "Close-Grip Dip"
+      ],
+      "notes": "Keep your upper arm behind your torso throughout the ROM.",
+      "weekly": [
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        }
+      ]
+    },
+    "mm_dbWristCurl": {
+      "name": "DB Wrist Curl",
+      "group": "mm_dbWristCurl",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Cable Wrist Curl"
+      ],
+      "notes": "Smooth, controlled reps.",
+      "weekly": [
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "mm_dbWristExtension": {
+      "name": "DB Wrist Extension",
+      "group": "mm_dbWristExtension",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Cable Wrist Extension"
+      ],
+      "notes": "Smooth, controlled reps.",
+      "weekly": [
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "mm_alternatingDbCurl": {
+      "name": "Alternating DB Curl",
+      "group": "mm_alternatingDbCurl",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 1,
+      "targetReps": 6,
+      "loadMode": "manual",
+      "repRange": "6-8",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "Barbell Curl",
+        "EZ-Bar Curl"
+      ],
+      "notes": "Slow, controlled reps!",
+      "weekly": [
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ]
+        },
+        {
+          "rir": [
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        },
+        {
+          "rir": [
+            0
+          ],
+          "technique": "Två dropset (~25 % per drop)"
+        }
+      ]
+    },
+    "mm_machineLateralRaise": {
+      "name": "Machine Lateral Raise",
+      "group": "mm_machineLateralRaise",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 8,
+      "loadMode": "manual",
+      "repRange": "8-10",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [
+        "High-Cable Lateral Raise",
+        "DB Lateral Raise"
+      ],
+      "notes": "Focus on squeezing your side delt to move the weight.",
+      "weekly": [
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            1,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Myo-reps"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Myo-reps"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Myo-reps"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Myo-reps"
+        },
+        {
+          "rir": [
+            0,
+            0
+          ],
+          "technique": "Myo-reps"
+        }
+      ]
+    },
+    "mm_deadHang": {
+      "name": "Dead Hang (optional)",
+      "group": "mm_deadHang",
+      "isMain": false,
+      "setScheme": "fixed",
+      "targetSets": 2,
+      "targetReps": 30,
+      "loadMode": "manual",
+      "bodyweight": true,
+      "repRange": "max tid (reps = sekunder)",
+      "warmupSets": "0-1",
+      "rest": "1-2 min",
+      "substitutions": [],
+      "notes": "Try to add a few more seconds each week!",
+      "weekly": [
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        },
+        {
+          "rir": [
+            0,
+            0
+          ]
+        }
+      ]
+    }
+  },
+  "dayTemplates": {
+    "5": [
+      [
+        "mm_lyingLegCurl",
+        "mm_squat",
+        "mm_barbellInclinePress",
+        "mm_inclineDbYRaise",
+        "mm_pullUp",
+        "mm_standingCalfRaise"
+      ],
+      [
+        "mm_closeGripLatPulldown",
+        "mm_chestSupportedTBarRow",
+        "mm_machineShrug",
+        "mm_machineChestPress",
+        "mm_highCableLateralRaise",
+        "mm_1ArmReversePecDeck",
+        "mm_cableCrunch"
+      ],
+      [],
+      [
+        "mm_legExtension",
+        "mm_barbellRdl",
+        "mm_machineHipThrust",
+        "mm_legPress",
+        "mm_standingCalfRaiseLow"
+      ],
+      [
+        "mm_bayesianCableCurl",
+        "mm_overheadCableTricepsExtension",
+        "mm_modifiedZottmanCurl",
+        "mm_cableTricepsKickback",
+        "mm_dbWristCurl",
+        "mm_dbWristExtension",
+        "mm_alternatingDbCurl",
+        "mm_machineLateralRaise",
+        "mm_deadHang"
+      ]
+    ]
+  },
+  "dayNames": [
+    "Mån · Full Body",
+    "Tis · Upper",
+    "Ons · Spinning",
+    "Tor · Lower",
+    "Lör · Arms/Delts"
+  ],
+  "weekLabels": [
+    "Block 1 · Intro-vecka",
+    "Block 1",
+    "Block 1",
+    "Block 1",
+    "Block 1",
+    "Block 1",
+    "Deload",
+    "Block 2 · intensitetstekniker",
+    "Block 2 · intensitetstekniker",
+    "Block 2 · intensitetstekniker",
+    "Block 2 · intensitetstekniker",
+    "Block 2 · intensitetstekniker"
+  ],
+  "weekNotes": [
+    "Tillägg: hopp 3×3 submaximal höjd · carries lätt/moderat · dead hang 2×30 s · HIIT 6×20/100 · spinning lugn/moderat. Lämna tydlig marginal.",
+    "Tillägg: hopp 3×3 maximal kvalitet · carries +2-4 kg eller +5 m · dead hang +5-10 s · HIIT 7-8×20/100 · spinning zon 2. Ingen failure i tilläggen.",
+    "Tillägg: hopp 3×3 maximal kvalitet · carries +2-4 kg eller +5 m · dead hang +5-10 s · HIIT 7-8×20/100 · spinning zon 2. Ingen failure i tilläggen.",
+    "Tillägg: hopp 3×3 · carries fortsatt små ökningar · dead hang 2×45-60 s · HIIT 8×25-30/90 · spinning moderat. Behåll fräscha hopp.",
+    "Tillägg: hopp 3×3 · carries fortsatt små ökningar · dead hang 2×45-60 s · HIIT 8×25-30/90 · spinning moderat. Behåll fräscha hopp.",
+    "Tillägg (återhämtning): hopp 2×3 · carries −20 % · dead hang 2×30 s · 5-6 lätta intervaller · spinning lugn.",
+    "Deload: hopp 2×3 lätt · carries lätt · dead hang 2×25-30 s · HIIT valfritt eller bort · spinning lugn.",
+    "Tillägg: hopp 3×3 maximal kvalitet · carries progression återupptas · dead hang öka tid/vikt · HIIT 7-8 intervaller · spinning zon 2. Intensitetsteknikerna ökar tröttheten.",
+    "Tillägg: hopp 3×3 maximal kvalitet · carries progression · dead hang öka tid/vikt · HIIT 7-8 intervaller · spinning zon 2.",
+    "Tillägg: hopp 3×3 maximal kvalitet · carries progression · dead hang öka tid/vikt · HIIT 7-8 intervaller · spinning zon 2.",
+    "Tillägg: hopp 2-3×3 · carries tungt men kort · dead hang 2 set · 6 kvalitetsintervaller · spinning moderat. Ingen extra volym.",
+    "Utvärdering: hopp test eller 2×3 lätt · carry test 40 m eller lätt · dead hang test max tid eller lätt · HIIT valfritt kort test · spinning lugn."
+  ],
+  "weekMainIntensity": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "variationOffset": 0,
+  "percentChart": [
+    {
+      "pct": 1,
+      "reps": 1,
+      "rir": 0
+    }
+  ],
+  "defaultThresholds": {
+    "lower": 0,
+    "upper": 0,
+    "increasePct": 0,
+    "decreasePct": 0
+  },
+  "defaultSettings": {
+    "frequency": 5,
+    "rounding": 2.5,
+    "singleAt8Percent": 0.9,
+    "unit": "kg"
+  },
+  "dayPrep": {
+    "5": [
+      {
+        "mobility": [
+          {
+            "name": "Knee-over-toe rocks",
+            "setsReps": "Lower flow, 1 varv"
+          },
+          {
+            "name": "90/90 hip flow",
+            "setsReps": "1 varv"
+          },
+          {
+            "name": "Deep squat hold",
+            "setsReps": "1 varv"
+          },
+          {
+            "name": "Adductor rock-back",
+            "setsReps": "1 varv (alt: cossack squat)"
+          }
+        ],
+        "explosive": [
+          {
+            "name": "Box jump",
+            "setsReps": "3×3 max fart, full vila (alt: broad jump / CMJ)"
+          }
+        ],
+        "extras": [
+          {
+            "name": "Farmer carry",
+            "setsReps": "3×30-40 m - tungt men stabilt (alt: trap-bar carry)"
+          }
+        ]
+      },
+      {
+        "mobility": [
+          {
+            "name": "Shoulder CARs",
+            "setsReps": "Upper flow, 1 varv"
+          },
+          {
+            "name": "Wall slides",
+            "setsReps": "1 varv"
+          },
+          {
+            "name": "Thoracic rotation",
+            "setsReps": "1 varv"
+          },
+          {
+            "name": "Band pull-aparts",
+            "setsReps": "1 varv (alt: scap push-up)"
+          }
+        ],
+        "explosive": [
+          {
+            "name": "Medball chest throw",
+            "setsReps": "3×3 max fart (alt: plyo push-up / landmine push press)"
+          }
+        ],
+        "extras": [
+          {
+            "name": "Dead hang",
+            "setsReps": "2×30-60 s - sluta innan greppet kollapsar"
+          }
+        ]
+      },
+      {
+        "mobility": [
+          {
+            "name": "Höft/fotled",
+            "setsReps": "5-10 min"
+          }
+        ],
+        "extras": [
+          {
+            "name": "Spinning",
+            "setsReps": "45-60 min, främst zon 2/moderat"
+          }
+        ]
+      },
+      {
+        "mobility": [
+          {
+            "name": "Knee-over-toe rocks",
+            "setsReps": "Lower flow, 1 varv"
+          },
+          {
+            "name": "90/90 hip flow",
+            "setsReps": "1 varv"
+          },
+          {
+            "name": "Deep squat hold",
+            "setsReps": "1 varv"
+          },
+          {
+            "name": "Adductor rock-back",
+            "setsReps": "1 varv (alt: cossack squat)"
+          }
+        ],
+        "explosive": [
+          {
+            "name": "Broad jump",
+            "setsReps": "3×3 max fart, mjuk landning (alt: box jump / KB swing 3×6)"
+          }
+        ],
+        "extras": [
+          {
+            "name": "Suitcase carry",
+            "setsReps": "3×25-30 m/sida - rak bål (alt: front-rack carry)"
+          }
+        ]
+      },
+      {
+        "mobility": [
+          {
+            "name": "Shoulder CARs",
+            "setsReps": "Upper flow, 1 varv"
+          },
+          {
+            "name": "Wall slides",
+            "setsReps": "1 varv"
+          },
+          {
+            "name": "Thoracic rotation",
+            "setsReps": "1 varv"
+          },
+          {
+            "name": "Band pull-aparts",
+            "setsReps": "1 varv (alt: scap push-up)"
+          }
+        ],
+        "explosive": [
+          {
+            "name": "Plyo push-up",
+            "setsReps": "3×5 snabba reps (alt: medball slam)"
+          }
+        ],
+        "extras": [
+          {
+            "name": "HIIT air bike/spinningcykel",
+            "setsReps": "6-8 × 20-30 s hårt / 90-100 s lugnt (alt: rodd, SkiErg)"
+          }
+        ]
+      }
+    ]
+  }
+}

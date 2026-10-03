@@ -6,8 +6,7 @@ import { Card } from '../ui/Card';
 import { SectionHeader } from '../ui/SectionHeader';
 import { ListRow } from '../ui/ListRow';
 import { Button } from '../ui/Button';
-
-const FREQUENCIES = [2, 3, 4, 5, 6];
+import { availableFrequencies, isManualLoad } from '../domain/programEngine';
 
 const fieldInputClass =
   'w-24 rounded-lg border-0 bg-app px-2 py-1.5 text-right text-[15px] text-ink focus:outline-none focus:ring-2 focus:ring-accent';
@@ -60,7 +59,12 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const liftOrder = Object.keys(program.lifts);
   const mainKeys = liftOrder.filter((k) => program.lifts[k].isMain);
   // Kroppsviktslyft har inget max att fylla i - de räknas inte på procent.
-  const variantKeys = liftOrder.filter((k) => !program.lifts[k].isMain && !program.lifts[k].bodyweight);
+  const variantKeys = liftOrder.filter(
+    (k) => !program.lifts[k].isMain && !program.lifts[k].bodyweight && !isManualLoad(program.lifts[k]),
+  );
+  // Ett program där vikten väljs manuellt (Min-Max) har inga max, ingen
+  // singel@RPE8 och ingen autoreglering - dölj de inställningarna helt.
+  const usesMaxes = mainKeys.length + variantKeys.length > 0;
 
   return (
     <Sheet title="Inställningar" onClose={onClose}>
@@ -74,7 +78,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
               value={frequency}
               onChange={(e) => setFrequency(Number(e.target.value))}
             >
-              {FREQUENCIES.map((f) => (
+              {availableFrequencies(program).map((f) => (
                 <option key={f} value={f}>
                   {f}
                 </option>
@@ -105,118 +109,125 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
             />
           }
         />
-        <ListRow
-          title="Singel @RPE8 (% av 1RM)"
-          right={
-            <input
-              type="number"
-              step={0.01}
-              className={fieldInputClass}
-              value={singleAt8Percent}
-              onChange={(e) => setSingleAt8Percent(Number(e.target.value))}
-            />
-          }
-        />
-      </Card>
-      <p className="mb-1 mt-2 px-1 text-xs text-dim">
-        En singel med 2 reps kvar (RPE8) antas motsvara denna andel av ditt sanna 1RM.
-      </p>
-
-      <SectionHeader title="Autoreglering (set/vecka)" />
-      <Card className="divide-y divide-app">
-        <ListRow
-          title="Nedre tröskel"
-          right={
-            <input
-              type="number"
-              step={1}
-              className={fieldInputClass}
-              value={lower}
-              onChange={(e) => setLower(Number(e.target.value))}
-            />
-          }
-        />
-        <ListRow
-          title="Övre tröskel"
-          right={
-            <input
-              type="number"
-              step={1}
-              className={fieldInputClass}
-              value={upper}
-              onChange={(e) => setUpper(Number(e.target.value))}
-            />
-          }
-        />
-        <ListRow
-          title="Öka med (%)"
-          right={
-            <input
-              type="number"
-              step={1}
-              className={fieldInputClass}
-              value={increasePct}
-              onChange={(e) => setIncreasePct(Number(e.target.value))}
-            />
-          }
-        />
-        <ListRow
-          title="Minska med (%)"
-          right={
-            <input
-              type="number"
-              step={1}
-              className={fieldInputClass}
-              value={decreasePct}
-              onChange={(e) => setDecreasePct(Number(e.target.value))}
-            />
-          }
-        />
-      </Card>
-      <p className="mb-1 mt-2 px-1 text-xs text-dim">
-        Under nedre tröskeln → sänk max. Vid/över övre tröskeln → höj max. Standard: 4-6 set, +2%/−5%.
-      </p>
-
-      <SectionHeader title="Max (huvudlyft)" />
-      <Card className="divide-y divide-app">
-        {mainKeys.map((k) => (
+        {usesMaxes && (
           <ListRow
-            key={k}
-            title={program.lifts[k].name}
+            title="Singel @RPE8 (% av 1RM)"
             right={
               <input
                 type="number"
-                step={0.5}
+                step={0.01}
                 className={fieldInputClass}
-                value={maxes[k] ?? ''}
-                onChange={(e) => setMax(k, e.target.value)}
+                value={singleAt8Percent}
+                onChange={(e) => setSingleAt8Percent(Number(e.target.value))}
               />
             }
           />
-        ))}
+          )}
       </Card>
+      {usesMaxes && (
+        <>
+          <p className="mb-1 mt-2 px-1 text-xs text-dim">
+            En singel med 2 reps kvar (RPE8) antas motsvara denna andel av ditt sanna 1RM.
+          </p>
 
-      <SectionHeader title="Max (varianter, valfritt)" />
-      <p className="mb-1 px-1 text-xs text-dim">
-        Känner du inte till ditt max? Gissa lågt till att börja med – du kan justera senare.
-      </p>
-      <Card className="divide-y divide-app">
-        {variantKeys.map((k) => (
-          <ListRow
-            key={k}
-            title={program.lifts[k].name}
-            right={
-              <input
-                type="number"
-                step={0.5}
-                className={fieldInputClass}
-                value={maxes[k] ?? ''}
-                onChange={(e) => setMax(k, e.target.value)}
+          <SectionHeader title="Autoreglering (set/vecka)" />
+          <Card className="divide-y divide-app">
+            <ListRow
+              title="Nedre tröskel"
+              right={
+                <input
+                  type="number"
+                  step={1}
+                  className={fieldInputClass}
+                  value={lower}
+                  onChange={(e) => setLower(Number(e.target.value))}
+                />
+              }
+            />
+            <ListRow
+              title="Övre tröskel"
+              right={
+                <input
+                  type="number"
+                  step={1}
+                  className={fieldInputClass}
+                  value={upper}
+                  onChange={(e) => setUpper(Number(e.target.value))}
+                />
+              }
+            />
+            <ListRow
+              title="Öka med (%)"
+              right={
+                <input
+                  type="number"
+                  step={1}
+                  className={fieldInputClass}
+                  value={increasePct}
+                  onChange={(e) => setIncreasePct(Number(e.target.value))}
+                />
+              }
+            />
+            <ListRow
+              title="Minska med (%)"
+              right={
+                <input
+                  type="number"
+                  step={1}
+                  className={fieldInputClass}
+                  value={decreasePct}
+                  onChange={(e) => setDecreasePct(Number(e.target.value))}
+                />
+              }
+            />
+          </Card>
+          <p className="mb-1 mt-2 px-1 text-xs text-dim">
+            Under nedre tröskeln → sänk max. Vid/över övre tröskeln → höj max. Standard: 4-6 set, +2%/−5%.
+          </p>
+
+          <SectionHeader title="Max (huvudlyft)" />
+          <Card className="divide-y divide-app">
+            {mainKeys.map((k) => (
+              <ListRow
+                key={k}
+                title={program.lifts[k].name}
+                right={
+                  <input
+                    type="number"
+                    step={0.5}
+                    className={fieldInputClass}
+                    value={maxes[k] ?? ''}
+                    onChange={(e) => setMax(k, e.target.value)}
+                  />
+                }
               />
-            }
-          />
-        ))}
-      </Card>
+            ))}
+          </Card>
+
+          <SectionHeader title="Max (varianter, valfritt)" />
+          <p className="mb-1 px-1 text-xs text-dim">
+            Känner du inte till ditt max? Gissa lågt till att börja med – du kan justera senare.
+          </p>
+          <Card className="divide-y divide-app">
+            {variantKeys.map((k) => (
+              <ListRow
+                key={k}
+                title={program.lifts[k].name}
+                right={
+                  <input
+                    type="number"
+                    step={0.5}
+                    className={fieldInputClass}
+                    value={maxes[k] ?? ''}
+                    onChange={(e) => setMax(k, e.target.value)}
+                  />
+                }
+              />
+            ))}
+          </Card>
+
+        </>
+      )}
 
       <SectionHeader title="Favorit-ryggövning" />
       <Card className="mb-5">
